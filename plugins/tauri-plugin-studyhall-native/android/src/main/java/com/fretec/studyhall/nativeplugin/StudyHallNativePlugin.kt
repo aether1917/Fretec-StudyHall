@@ -87,7 +87,7 @@ class StudyHallNativePlugin(private val activity: Activity) : Plugin(activity) {
         } else {
             true
         }
-        invoke.resolve(granted)
+        invoke.resolveObject(granted)
     }
 
     /** 通知按钮回调，转发给前端 / Rust 侧。 */
