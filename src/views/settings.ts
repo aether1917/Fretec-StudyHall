@@ -570,7 +570,20 @@ function openPhoneSheet(source: Source): void {
           return;
         }
         if (source === "bili") {
-          await api.biliLoginPassword(phone, passwordInput.value, null);
+          try {
+            await api.biliLoginPassword(phone, passwordInput.value, null);
+          } catch (error) {
+            const message =
+              error instanceof Error ? error.message : String(error);
+            if (!message.includes("NEED_CAPTCHA")) throw error;
+            const config = await api.biliCaptchaConfig();
+            const captcha = await runBiliCaptcha(config, "人机验证");
+            await api.biliLoginPassword(
+              phone,
+              passwordInput.value,
+              `${captcha.challenge}|${captcha.validate}|${captcha.seccode}`,
+            );
+          }
         } else {
           await api.neteaseLoginPassword(phone, passwordInput.value);
         }

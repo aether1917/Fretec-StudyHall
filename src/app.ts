@@ -10,7 +10,7 @@ import { openSearchOverlay } from "./overlays/search";
 import { openLanOverlay } from "./overlays/lan";
 import { openPlayer, playerBridge, togglePlayback } from "./overlays/player";
 import { icon } from "./ui/icons";
-import { authStatus, flowList, lanStatus, onEvent, timerGet } from "./api";
+import { authStatus, flowList, lanStatus, onEvent, timerGet, timerPause, timerResume, timerStop } from "./api";
 import type {
   AuthStatus,
   LanStatus,
@@ -155,6 +155,32 @@ function wireEvents(): void {
   void onEvent<void>("ui://open-clock", () => {
     openClock();
   });
+
+  void onEvent<{ action: string }>(
+    "plugin:studyhall-native:timerAction",
+    ({ action }) => {
+      void handleNativeTimerAction(action);
+    },
+  );
+}
+
+async function handleNativeTimerAction(action: string): Promise<void> {
+  try {
+    const snapshot =
+      action === "pause"
+        ? await timerPause()
+        : action === "resume"
+          ? await timerResume()
+          : action === "stop"
+            ? await timerStop()
+            : null;
+    if (snapshot) {
+      store.set({ timer: snapshot });
+      updateClock(snapshot);
+    }
+  } catch {
+    /* 通知操作失败时保持界面状态，等待下一次同步 */
+  }
 }
 
 function wireBanner(): void {

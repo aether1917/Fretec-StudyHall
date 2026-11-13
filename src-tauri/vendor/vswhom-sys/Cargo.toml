@@ -1,0 +1,12 @@
+[package]
+name = "vswhom-sys"
+version = "0.1.3"
+edition = "2018"
+description = "Vendored pure-Rust stub for vswhom-sys (no C++ toolchain required)"
+license = "MIT"
+
+[lib]
+name = "vswhom_sys"
+
+[dependencies]
+libc = "0.2"

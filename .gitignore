@@ -21,3 +21,4 @@ Thumbs.db
 
 # 工具运行时数据
 .mnemon/
+.xwin-cache/

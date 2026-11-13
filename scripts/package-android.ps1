@@ -9,6 +9,12 @@ if (-not $env:JAVA_HOME) {
         Where-Object { $_.Name -like 'jdk-17*' } | Select-Object -First 1
     if ($jdk) { $env:JAVA_HOME = $jdk.FullName }
 }
+if (-not $env:JAVA_HOME) {
+    $localJdk = Join-Path $env:USERPROFILE '.tools\jdk17'
+    $java = Get-ChildItem $localJdk -Recurse -Filter 'java.exe' -ErrorAction SilentlyContinue |
+        Where-Object { $_.FullName -like '*\bin\java.exe' } | Select-Object -First 1
+    if ($java) { $env:JAVA_HOME = Split-Path -Parent (Split-Path -Parent $java.FullName) }
+}
 if (-not $env:ANDROID_HOME) {
     $env:ANDROID_HOME = Join-Path $env:LOCALAPPDATA 'Android\Sdk'
 }

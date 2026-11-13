@@ -21,7 +21,10 @@ use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default();
+    #[cfg(target_os = "android")]
+    let builder = builder.plugin(tauri_plugin_studyhall_native::init());
+    builder
         .setup(|app| {
             let data_dir = app.path().app_data_dir()?;
             let paths = storage::AppPaths::new(data_dir);
