@@ -6,7 +6,7 @@ use crate::bili::BiliRuntime;
 use crate::lan::LanService;
 use crate::media::MediaService;
 use crate::netease::NeteaseRuntime;
-use crate::storage::{AppPaths, AuthStore, DeviceInfo, FlowStore};
+use crate::storage::{AppPaths, AppSettings, AuthStore, DeviceInfo, FlowStore};
 use crate::types::{CaptchaAnswer, Source, TimerSnapshot};
 use crate::timer::TimerEngine;
 
@@ -16,6 +16,7 @@ pub struct AppState {
     pub flow: Mutex<FlowStore>,
     pub auth: Mutex<AuthStore>,
     pub device: Mutex<DeviceInfo>,
+    pub settings: Mutex<AppSettings>,
     pub http: reqwest::Client,
     pub timer: Arc<TimerEngine>,
     pub media: MediaService,
@@ -34,6 +35,7 @@ impl AppState {
         let flow = paths.load_flow();
         let auth = paths.load_auth();
         let device = paths.load_device();
+        let settings = paths.load_settings();
         let timer = Arc::new(TimerEngine::new());
         Self {
             app: OnceLock::new(),
@@ -41,6 +43,7 @@ impl AppState {
             flow: Mutex::new(flow),
             auth: Mutex::new(auth),
             device: Mutex::new(device),
+            settings: Mutex::new(settings),
             http,
             timer: timer.clone(),
             media: MediaService::new(),
@@ -77,6 +80,13 @@ impl AppState {
         let snapshot = self.device.lock().expect("device lock").clone();
         if let Err(error) = self.paths.save_device(&snapshot) {
             eprintln!("save device failed: {error}");
+        }
+    }
+
+    pub fn save_settings(&self) {
+        let snapshot = self.settings.lock().expect("settings lock").clone();
+        if let Err(error) = self.paths.save_settings(&snapshot) {
+            eprintln!("save settings failed: {error}");
         }
     }
 

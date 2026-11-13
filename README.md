@@ -1,6 +1,6 @@
 # Fretec StudyHall
 
-一个番茄钟加学习流的桌面/移动应用，用 Rust + Tauri v2 写，一套代码构建 Windows、Linux 和 Android。界面是纯黑单色，右上角是翻页钟胶囊，底部是学习流和设置两个页面，学习流里可以放 B 站视频和网易云音乐，点开就能在应用内播放。
+一个番茄钟加学习流的桌面/移动应用，用 Rust + Tauri v2 写，一套代码构建 Windows、Linux 和 Android。界面是单色，默认浅色，可以在设置里切成深色或跟随系统。右上角是翻页钟胶囊，底部是学习流和设置两个页面，学习流里可以放 B 站视频和网易云音乐，点开就能在应用内播放。
 
 现在做出来的东西：
 
@@ -11,6 +11,17 @@
 - 登录：两家都支持二维码和手机验证码，Android 额外有手机号加密码。B 站人机验证在应用内的独立窗口里完成。
 - 局域网：UDP 广播发现，TCP 长连接，只同步倒计时状态，最多 4 台。计时进行中不允许新建连接，学习流和播放进度不同步。
 - 托盘和通知：Windows/Linux 关窗口后留在托盘，单击显示或隐藏，菜单里有退出；Android 用前台服务维护常驻通知。
+- 设置：外观（浅色 / 深色 / 跟随系统）、关闭窗口行为（桌面）、通知权限（Android）、检查更新和关于。检查更新读 Gitee 的 release 接口，只做版本比对，安装包需要手动去发行页下载。
+
+## 界面
+
+浅色是默认外观，也能切到深色或跟随系统。
+
+![学习流](docs/screenshots/01-study-flow-empty.png)
+![翻页钟](docs/screenshots/02-flip-clock.png)
+![设置](docs/screenshots/04-settings.png)
+![深色设置](docs/screenshots/08-dark-settings.png)
+![检查更新](docs/screenshots/09-update-check.png)
 
 ## 目录
 
@@ -87,7 +98,7 @@ Windows 存在 `%APPDATA%\com.fretec.studyhall\`，Android 在应用私有目录
 
 ## 本机验证情况
 
-Windows 上跑过：启动、两个页面切换、胶囊展开和收回、开始/暂停/继续、B 站真实搜索和添加、卡片打开播放器并播放、返回后迷你条出现、`flow.json` 里进度正常写入。`cargo test` 50 个测试通过，`cargo clippy -D warnings` 通过，`pnpm typecheck` 和 `pnpm build` 通过，`node scripts/check-tokens.mjs` 通过。产物是 `out/Fretec StudyHall_0.0.1-beta.1_x64-setup.exe` 和 `out/Fretec-StudyHall-0.0.1-beta.1-arm64.apk`。
+Windows 上跑过：启动、两个页面切换、胶囊展开和收回、开始/暂停/继续、B 站真实搜索和添加、卡片打开播放器并播放、返回后迷你条出现、`flow.json` 里进度正常写入；浅色和深色切换、检查更新、关闭窗口行为也实际点过。`cargo test` 50 个测试通过，`cargo clippy -D warnings` 通过，`pnpm typecheck` 和 `pnpm build` 通过，`node scripts/check-tokens.mjs` 通过。产物是 `out/Fretec StudyHall_0.1.0-beta.1_x64-setup.exe` 和 `out/Fretec-StudyHall-0.1.0-beta.1-arm64.apk`。
 
 没条件验证的：扫码、短信、密码登录和极验验证（需要真实账号）；局域网两台设备之间的发现和同步（只有代码和单元测试）；Android 真机上的通知和权限弹窗；托盘悬停提示的实际效果；Linux 打包。
 

@@ -161,7 +161,7 @@ export function buildShell(): ShellRefs {
   );
 
   const overlayRoot = h("div", { id: "overlay-root" });
-  const clockLayer = h("div", { class: "clock-layer", id: "clock-layer" });
+  const clockLayer = h("div", { class: "clock-layer force-dark", id: "clock-layer" });
   const veil = h("div", { class: "veil", id: "veil" });
   const mediaHost = h("div", {
     id: "player-media",

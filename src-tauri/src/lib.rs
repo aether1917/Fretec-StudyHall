@@ -78,6 +78,12 @@ pub fn run() {
             commands::flow_progress_save,
             commands::device_get_name,
             commands::device_set_name,
+            commands::settings_get,
+            commands::settings_set,
+            commands::app_version,
+            commands::check_update,
+            commands::native_notification_status,
+            commands::native_notification_request,
             commands::timer_get,
             commands::timer_start,
             commands::timer_pause,
@@ -110,8 +116,23 @@ pub fn run() {
         .on_window_event(|window, event| {
             #[cfg(desktop)]
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                api.prevent_close();
-                let _ = window.hide();
+                let app = window.app_handle();
+                let behavior = app
+                    .state::<state::AppState>()
+                    .settings
+                    .lock()
+                    .expect("settings lock")
+                    .close_behavior
+                    .clone();
+                if behavior == "quit" {
+                    let state = app.state::<state::AppState>();
+                    state.lan.stop();
+                    notification::stop(app);
+                    app.exit(0);
+                } else {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
             }
             #[cfg(not(desktop))]
             {

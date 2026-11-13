@@ -33,6 +33,12 @@ impl<R: Runtime> StudyHallHandle<R> {
             .0
             .run_mobile_plugin::<()>("requestNotificationPermission", ());
     }
+
+    pub fn permission_status(&self) -> bool {
+        self.0
+            .run_mobile_plugin::<bool>("notificationPermissionStatus", ())
+            .unwrap_or(false)
+    }
 }
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {

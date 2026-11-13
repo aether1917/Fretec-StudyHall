@@ -3,6 +3,7 @@ const COMMANDS: &[&str] = &[
     "updateTimer",
     "stopTimer",
     "requestNotificationPermission",
+    "notificationPermissionStatus",
 ];
 
 fn main() {

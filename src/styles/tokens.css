@@ -1,65 +1,70 @@
 /*
- * Fretec StudyHall — Material 3 设计令牌（单色暗色）
+ * Fretec StudyHall 设计令牌（单色，明暗两套）
  *
- * 规则：全应用仅此处允许出现具体色值；组件与页面只能消费 --md-sys-*。
- * 色板限定为纯黑 / 深灰 / 浅灰，界面内不出现彩色。
+ * 规则：全应用仅此处允许出现具体色值；组件只消费 --md-sys-*。
+ * 默认浅色；[data-theme="dark"] 切到深色；.force-dark 用于始终深色的翻页钟。
  */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 
-  /* ---------- Color: surface / background ---------- */
-  --md-sys-color-background: #000000;
-  --md-sys-color-on-background: #ededed;
-  --md-sys-color-surface: #0a0a0a;
-  --md-sys-color-surface-container-lowest: #000000;
-  --md-sys-color-surface-container-low: #0f0f0f;
-  --md-sys-color-surface-container: #141414;
-  --md-sys-color-surface-container-high: #1c1c1c;
-  --md-sys-color-surface-container-highest: #242424;
-  --md-sys-color-surface-variant: #1c1c1c;
-  --md-sys-color-surface-dim: #0a0a0a;
-  --md-sys-color-surface-bright: #2a2a2a;
+  /* ---------- Color: surface / background（浅色） ---------- */
+  --md-sys-color-background: #ffffff;
+  --md-sys-color-on-background: #141414;
+  --md-sys-color-surface: #f7f7f7;
+  --md-sys-color-surface-container-lowest: #ffffff;
+  --md-sys-color-surface-container-low: #f4f4f4;
+  --md-sys-color-surface-container: #eeeeee;
+  --md-sys-color-surface-container-high: #e4e4e4;
+  --md-sys-color-surface-container-highest: #d9d9d9;
+  --md-sys-color-surface-variant: #e4e4e4;
+  --md-sys-color-surface-dim: #e9e9e9;
+  --md-sys-color-surface-bright: #ffffff;
 
   /* ---------- Color: text / icons ---------- */
-  --md-sys-color-on-surface: #ededed;
-  --md-sys-color-on-surface-variant: #a8a8a8;
-  --md-sys-color-on-surface-muted: #6e6e6e;
-  --md-sys-color-inverse-surface: #ededed;
-  --md-sys-color-inverse-on-surface: #0a0a0a;
+  --md-sys-color-on-surface: #141414;
+  --md-sys-color-on-surface-variant: #5c5c5c;
+  --md-sys-color-on-surface-muted: #8a8a8a;
+  --md-sys-color-inverse-surface: #242424;
+  --md-sys-color-inverse-on-surface: #f7f7f7;
 
   /* ---------- Color: lines / outlines ---------- */
-  --md-sys-color-outline: #3a3a3a;
-  --md-sys-color-outline-variant: #262626;
+  --md-sys-color-outline: #c4c4c4;
+  --md-sys-color-outline-variant: #e2e2e2;
   --md-sys-color-scrim: #000000;
   --md-sys-color-veil: #000000;
+  --md-sys-color-video-surface: #000000;
 
-  /* ---------- Color: primary / secondary / tertiary（单色体系） ---------- */
-  --md-sys-color-primary: #ededed;
-  --md-sys-color-on-primary: #0a0a0a;
-  --md-sys-color-primary-container: #2a2a2a;
-  --md-sys-color-on-primary-container: #ededed;
-  --md-sys-color-secondary: #a8a8a8;
-  --md-sys-color-on-secondary: #0a0a0a;
-  --md-sys-color-secondary-container: #1c1c1c;
-  --md-sys-color-on-secondary-container: #ededed;
-  --md-sys-color-tertiary: #a8a8a8;
-  --md-sys-color-on-tertiary: #0a0a0a;
+  /* 二维码固定黑码白底，和界面明暗无关 */
+  --md-sys-color-qr-dark: #141414;
+  --md-sys-color-qr-light: #ffffff;
 
-  /* ---------- Color: state / error（仍保持无彩色） ---------- */
-  --md-sys-color-error: #ededed;
-  --md-sys-color-on-error: #0a0a0a;
-  --md-sys-color-error-container: #2a2a2a;
-  --md-sys-color-on-error-container: #ededed;
-  --md-sys-color-surface-tint: #ededed;
+  /* ---------- Color: primary / secondary / tertiary ---------- */
+  --md-sys-color-primary: #141414;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-primary-container: #e4e4e4;
+  --md-sys-color-on-primary-container: #141414;
+  --md-sys-color-secondary: #5c5c5c;
+  --md-sys-color-on-secondary: #ffffff;
+  --md-sys-color-secondary-container: #efefef;
+  --md-sys-color-on-secondary-container: #141414;
+  --md-sys-color-tertiary: #5c5c5c;
+  --md-sys-color-on-tertiary: #ffffff;
 
-  /* ---------- Color: 透明态（令牌化的半透明黑 / 白） ---------- */
-  --md-sys-color-state-hover: rgba(255, 255, 255, 0.08);
-  --md-sys-color-state-pressed: rgba(255, 255, 255, 0.12);
-  --md-sys-color-state-focus: rgba(255, 255, 255, 0.16);
-  --md-sys-color-surface-translucent: rgba(10, 10, 10, 0.92);
-  --md-sys-color-overlay-scrim: rgba(0, 0, 0, 0.72);
+  /* ---------- Color: state / error ---------- */
+  --md-sys-color-error: #141414;
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: #e4e4e4;
+  --md-sys-color-on-error-container: #141414;
+  --md-sys-color-surface-tint: #141414;
 
-  /* ---------- Shape（4dp 栅格） ---------- */
+  /* ---------- Color: 透明态 ---------- */
+  --md-sys-color-state-hover: rgba(0, 0, 0, 0.06);
+  --md-sys-color-state-pressed: rgba(0, 0, 0, 0.1);
+  --md-sys-color-state-focus: rgba(0, 0, 0, 0.14);
+  --md-sys-color-surface-translucent: rgba(255, 255, 255, 0.92);
+  --md-sys-color-overlay-scrim: rgba(0, 0, 0, 0.55);
+
+  /* ---------- Shape ---------- */
   --md-sys-shape-corner-none: 0px;
   --md-sys-shape-corner-extra-small: 4px;
   --md-sys-shape-corner-small: 8px;
@@ -68,7 +73,7 @@
   --md-sys-shape-corner-extra-large: 24px;
   --md-sys-shape-corner-full: 999px;
 
-  /* ---------- Spacing（4dp 栅格） ---------- */
+  /* ---------- Spacing ---------- */
   --md-sys-space-0: 0px;
   --md-sys-space-1: 4px;
   --md-sys-space-2: 8px;
@@ -81,7 +86,7 @@
   --md-sys-space-12: 48px;
   --md-sys-space-16: 64px;
 
-  /* ---------- Typescale（M3 命名） ---------- */
+  /* ---------- Typescale ---------- */
   --md-sys-typescale-font-family-plain: system-ui, -apple-system, "Segoe UI",
     "Noto Sans SC", "Microsoft YaHei", sans-serif;
   --md-sys-typescale-font-family-brand: "Fredoka", system-ui, sans-serif;
@@ -161,7 +166,7 @@
   --md-sys-typescale-label-small-weight: 500;
   --md-sys-typescale-label-small-tracking: 0.5px;
 
-  /* ---------- Motion（M3 emphasized） ---------- */
+  /* ---------- Motion ---------- */
   --md-sys-motion-duration-short1: 50ms;
   --md-sys-motion-duration-short2: 100ms;
   --md-sys-motion-duration-short4: 200ms;
@@ -173,12 +178,12 @@
   --md-sys-motion-easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
   --md-sys-motion-easing-accelerate: cubic-bezier(0.3, 0, 1, 1);
 
-  /* ---------- Elevation（无彩色阴影） ---------- */
-  --md-sys-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.6);
-  --md-sys-elevation-2: 0 2px 8px rgba(0, 0, 0, 0.6);
-  --md-sys-elevation-3: 0 8px 24px rgba(0, 0, 0, 0.7);
+  /* ---------- Elevation ---------- */
+  --md-sys-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --md-sys-elevation-2: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --md-sys-elevation-3: 0 8px 24px rgba(0, 0, 0, 0.16);
 
-  /* ---------- 组件尺寸（4dp 栅格） ---------- */
+  /* ---------- 组件尺寸 ---------- */
   --md-sys-size-touch-target: 48px;
   --md-sys-size-icon: 24px;
   --md-sys-size-top-bar: 56px;
@@ -194,4 +199,62 @@
   --md-sys-z-clock: 41;
   --md-sys-z-sheet: 50;
   --md-sys-z-toast: 60;
+}
+
+/* ---------- 深色：跟随系统或手动切换 ---------- */
+:root[data-theme="dark"],
+.force-dark {
+  color-scheme: dark;
+
+  --md-sys-color-background: #000000;
+  --md-sys-color-on-background: #ededed;
+  --md-sys-color-surface: #0a0a0a;
+  --md-sys-color-surface-container-lowest: #000000;
+  --md-sys-color-surface-container-low: #0f0f0f;
+  --md-sys-color-surface-container: #141414;
+  --md-sys-color-surface-container-high: #1c1c1c;
+  --md-sys-color-surface-container-highest: #242424;
+  --md-sys-color-surface-variant: #1c1c1c;
+  --md-sys-color-surface-dim: #0a0a0a;
+  --md-sys-color-surface-bright: #2a2a2a;
+
+  --md-sys-color-on-surface: #ededed;
+  --md-sys-color-on-surface-variant: #a8a8a8;
+  --md-sys-color-on-surface-muted: #6e6e6e;
+  --md-sys-color-inverse-surface: #ededed;
+  --md-sys-color-inverse-on-surface: #0a0a0a;
+
+  --md-sys-color-outline: #3a3a3a;
+  --md-sys-color-outline-variant: #262626;
+  --md-sys-color-scrim: #000000;
+  --md-sys-color-veil: #000000;
+  --md-sys-color-video-surface: #000000;
+  --md-sys-color-qr-dark: #141414;
+  --md-sys-color-qr-light: #ffffff;
+  --md-sys-color-primary: #ededed;
+  --md-sys-color-on-primary: #0a0a0a;
+  --md-sys-color-primary-container: #2a2a2a;
+  --md-sys-color-on-primary-container: #ededed;
+  --md-sys-color-secondary: #a8a8a8;
+  --md-sys-color-on-secondary: #0a0a0a;
+  --md-sys-color-secondary-container: #1c1c1c;
+  --md-sys-color-on-secondary-container: #ededed;
+  --md-sys-color-tertiary: #a8a8a8;
+  --md-sys-color-on-tertiary: #0a0a0a;
+
+  --md-sys-color-error: #ededed;
+  --md-sys-color-on-error: #0a0a0a;
+  --md-sys-color-error-container: #2a2a2a;
+  --md-sys-color-on-error-container: #ededed;
+  --md-sys-color-surface-tint: #ededed;
+
+  --md-sys-color-state-hover: rgba(255, 255, 255, 0.08);
+  --md-sys-color-state-pressed: rgba(255, 255, 255, 0.12);
+  --md-sys-color-state-focus: rgba(255, 255, 255, 0.16);
+  --md-sys-color-surface-translucent: rgba(10, 10, 10, 0.92);
+  --md-sys-color-overlay-scrim: rgba(0, 0, 0, 0.72);
+
+  --md-sys-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.6);
+  --md-sys-elevation-2: 0 2px 8px rgba(0, 0, 0, 0.6);
+  --md-sys-elevation-3: 0 8px 24px rgba(0, 0, 0, 0.7);
 }

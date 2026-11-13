@@ -140,6 +140,32 @@ export const deviceGetName = () => call<string>("device_get_name");
 export const deviceSetName = (name: string) =>
   call<string>("device_set_name", { name });
 
+/* ---------- 设置、更新与原生能力 ---------- */
+export interface AppSettings {
+  theme: string;
+  closeBehavior: string;
+}
+
+export interface UpdateInfo {
+  current: string;
+  latest: string;
+  hasUpdate: boolean;
+  url: string;
+  notes: string;
+}
+
+export const settingsGet = () => call<AppSettings>("settings_get");
+export const settingsSet = (payload: {
+  theme?: string;
+  closeBehavior?: string;
+}) => call<AppSettings>("settings_set", payload);
+export const appVersion = () => call<string>("app_version");
+export const checkUpdate = () => call<UpdateInfo>("check_update");
+export const nativeNotificationStatus = () =>
+  call<boolean>("native_notification_status");
+export const nativeNotificationRequest = () =>
+  call<void>("native_notification_request");
+
 /* ---------- 局域网 ---------- */
 export const lanStatus = () => call<LanStatus>("lan_status");
 export const lanStart = () => call<LanStatus>("lan_start");

@@ -77,6 +77,19 @@ class StudyHallNativePlugin(private val activity: Activity) : Plugin(activity) {
         invoke.resolve()
     }
 
+    @Command
+    fun notificationPermissionStatus(invoke: Invoke) {
+        val granted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                activity,
+                Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+        invoke.resolve(granted)
+    }
+
     /** 通知按钮回调，转发给前端 / Rust 侧。 */
     fun dispatchAction(action: String) {
         try {

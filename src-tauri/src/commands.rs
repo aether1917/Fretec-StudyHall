@@ -1,11 +1,14 @@
 use tauri::{AppHandle, Emitter, State};
+#[cfg(target_os = "android")]
+use tauri::Manager;
 
 use crate::error::{AppError, CmdResult};
 use crate::state::AppState;
+use crate::storage::AppSettings;
 use crate::types::{
     now_ms, AccountProfile, AuthStatus, CaptchaAnswer, CaptchaConfig, FlowItem, LanStatus,
     MediaPayload, Progress, QrLogin, QrPoll, SearchPage, SearchResultItem, SmsTicket, Source,
-    TimerSnapshot,
+    TimerSnapshot, UpdateInfo,
 };
 
 /* ---------------- 学习流 ---------------- */
@@ -120,6 +123,132 @@ pub fn device_set_name(state: State<'_, AppState>, name: String) -> CmdResult<St
     state.lan.update_name(trimmed.clone());
     state.publish_lan_status();
     Ok(trimmed)
+}
+
+/* ---------------- 设置与更新 ---------------- */
+
+#[tauri::command]
+pub fn settings_get(state: State<'_, AppState>) -> AppSettings {
+    state.settings.lock().expect("settings lock").clone()
+}
+
+#[tauri::command]
+pub fn settings_set(
+    state: State<'_, AppState>,
+    theme: Option<String>,
+    close_behavior: Option<String>,
+) -> CmdResult<AppSettings> {
+    {
+        let mut settings = state.settings.lock().expect("settings lock");
+        if let Some(theme) = theme {
+            let theme = theme.trim().to_string();
+            if !matches!(theme.as_str(), "light" | "dark" | "system") {
+                return Err(AppError::msg("不支持的显示模式"));
+            }
+            settings.theme = theme;
+        }
+        if let Some(behavior) = close_behavior {
+            let behavior = behavior.trim().to_string();
+            if !matches!(behavior.as_str(), "hide" | "quit") {
+                return Err(AppError::msg("不支持的关闭行为"));
+            }
+            settings.close_behavior = behavior;
+        }
+    }
+    state.save_settings();
+    Ok(state.settings.lock().expect("settings lock").clone())
+}
+
+#[tauri::command]
+pub fn app_version() -> String {
+    env!("CARGO_PKG_VERSION").to_string()
+}
+
+#[tauri::command]
+pub async fn check_update(state: State<'_, AppState>) -> CmdResult<UpdateInfo> {
+    const RELEASE_API: &str =
+        "https://gitee.com/api/v5/repos/aether2000/Fretec-StudyHall/releases/latest";
+    let current = env!("CARGO_PKG_VERSION").to_string();
+    let response = state
+        .http
+        .get(RELEASE_API)
+        .header(
+            reqwest::header::USER_AGENT,
+            format!("Fretec-StudyHall/{current}"),
+        )
+        .send()
+        .await
+        .map_err(|error| AppError::msg(format!("检查更新失败：{error}")))?;
+    if !response.status().is_success() {
+        return Err(AppError::msg(format!(
+            "检查更新失败（HTTP {}）",
+            response.status().as_u16()
+        )));
+    }
+    let json: serde_json::Value = response
+        .json()
+        .await
+        .map_err(|_| AppError::msg("检查更新失败：返回数据无法解析"))?;
+    let tag = json
+        .get("tag_name")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or("")
+        .trim()
+        .to_string();
+    if tag.is_empty() {
+        return Err(AppError::msg("检查更新失败：没有找到版本信息"));
+    }
+    let latest = tag.trim_start_matches('v').to_string();
+    let has_update = match (
+        semver::Version::parse(&current),
+        semver::Version::parse(&latest),
+    ) {
+        (Ok(current_version), Ok(latest_version)) => latest_version > current_version,
+        _ => !latest.is_empty() && latest != current,
+    };
+    let notes = json
+        .get("body")
+        .and_then(serde_json::Value::as_str)
+        .unwrap_or("")
+        .chars()
+        .take(600)
+        .collect::<String>();
+    Ok(UpdateInfo {
+        current,
+        latest,
+        has_update,
+        url: format!(
+            "https://gitee.com/aether2000/Fretec-StudyHall/releases/tag/{tag}"
+        ),
+        notes,
+    })
+}
+
+#[tauri::command]
+pub fn native_notification_status(app: AppHandle) -> bool {
+    #[cfg(target_os = "android")]
+    {
+        if let Some(handle) = app
+            .try_state::<tauri_plugin_studyhall_native::StudyHallHandle<tauri::Wry>>()
+        {
+            return handle.permission_status();
+        }
+    }
+    let _ = app;
+    false
+}
+
+#[tauri::command]
+pub fn native_notification_request(app: AppHandle) {
+    #[cfg(target_os = "android")]
+    {
+        if let Some(handle) = app
+            .try_state::<tauri_plugin_studyhall_native::StudyHallHandle<tauri::Wry>>()
+        {
+            handle.request_permission();
+        }
+    }
+    let _ = app;
 }
 
 /* ---------------- 计时 ---------------- */

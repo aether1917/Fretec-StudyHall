@@ -12,8 +12,11 @@ import type {
 import { icon } from "../ui/icons";
 import { showToast } from "../ui/toast";
 import { runBiliCaptcha, type CaptchaResult } from "../overlays/captcha";
+import { getThemeMode, setThemeMode, type ThemeMode } from "../theme";
 
 const isAndroid = /Android/i.test(navigator.userAgent);
+const REPO_URL = "https://gitee.com/aether2000/Fretec-StudyHall";
+const RELEASES_URL = `${REPO_URL}/releases`;
 
 let unsubscribe: (() => void) | null = null;
 let accountsHost: HTMLElement | null = null;
@@ -24,7 +27,14 @@ export function renderSettingsPage(container: HTMLElement): void {
   container.replaceChildren();
 
   const root = h("div", { class: "settings" });
-  root.append(buildDeviceSection(), buildAccountsSection());
+  root.append(
+    buildDeviceSection(),
+    buildAppearanceSection(),
+    ...(isAndroid ? [] : [buildBehaviorSection()]),
+    ...(isAndroid ? [buildNotificationSection()] : []),
+    buildAccountsSection(),
+    buildAboutSection(),
+  );
   container.append(root);
 
   let lastAuth: AuthStatus = store.get().auth;
@@ -123,6 +133,308 @@ function buildDeviceSection(): HTMLElement {
         { class: "settings-card__hint" },
         "名称用于局域网内识别本机，修改后会同步给已连接设备。",
       ),
+    ),
+  );
+}
+
+/* ---------------- 外观 ---------------- */
+
+function segmented(
+  options: Array<{ value: string; label: string }>,
+  selected: string,
+  onSelect: (value: string) => void,
+): { element: HTMLElement; mark: (value: string) => void } {
+  const element = h("div", {
+    class: "settings-segmented",
+    role: "tablist",
+  });
+  const buttons: HTMLButtonElement[] = [];
+  const mark = (value: string) => {
+    for (const button of buttons) {
+      button.setAttribute("aria-selected", String(button.dataset.value === value));
+    }
+  };
+  for (const option of options) {
+    const button = h(
+      "button",
+      {
+        class: "settings-segmented__item",
+        type: "button",
+        role: "tab",
+        "data-value": option.value,
+        "aria-selected": String(option.value === selected),
+      },
+      option.label,
+    ) as HTMLButtonElement;
+    button.addEventListener("click", () => {
+      mark(option.value);
+      onSelect(option.value);
+    });
+    buttons.push(button);
+    element.append(button);
+  }
+  return { element, mark };
+}
+
+function buildAppearanceSection(): HTMLElement {
+  const current = getThemeMode();
+  const { element, mark } = segmented(
+    [
+      { value: "light", label: "浅色" },
+      { value: "dark", label: "深色" },
+      { value: "system", label: "跟随系统" },
+    ],
+    current,
+    (value) => {
+      const mode = value as ThemeMode;
+      setThemeMode(mode);
+      void api.settingsSet({ theme: mode }).catch(() => undefined);
+    },
+  );
+  void api
+    .settingsGet()
+    .then((settings) => {
+      if (settings.theme === "light" || settings.theme === "dark" || settings.theme === "system") {
+        mark(settings.theme);
+      }
+    })
+    .catch(() => undefined);
+
+  return h(
+    "div",
+    { class: "settings__group" },
+    h("div", { class: "settings__group-title" }, "外观"),
+    h(
+      "div",
+      { class: "settings-card" },
+      h(
+        "div",
+        { class: "settings-card__row" },
+        h("div", { class: "settings-card__heading" }, "显示模式"),
+      ),
+      h(
+        "div",
+        { class: "settings-card__hint" },
+        "默认浅色，也可以跟随系统自动切换。",
+      ),
+      element,
+    ),
+  );
+}
+
+/* ---------------- 关闭窗口行为（桌面） ---------------- */
+
+function buildBehaviorSection(): HTMLElement {
+  const { element, mark } = segmented(
+    [
+      { value: "hide", label: "隐藏到托盘" },
+      { value: "quit", label: "直接退出" },
+    ],
+    "hide",
+    (value) => {
+      void api
+        .settingsSet({ closeBehavior: value })
+        .then(() => showToast("已保存，下次关闭窗口时生效"))
+        .catch((error: unknown) =>
+          showToast(error instanceof Error ? error.message : "保存失败", {
+            error: true,
+          }),
+        );
+    },
+  );
+  void api
+    .settingsGet()
+    .then((settings) => {
+      if (settings.closeBehavior === "hide" || settings.closeBehavior === "quit") {
+        mark(settings.closeBehavior);
+      }
+    })
+    .catch(() => undefined);
+
+  return h(
+    "div",
+    { class: "settings__group" },
+    h("div", { class: "settings__group-title" }, "窗口"),
+    h(
+      "div",
+      { class: "settings-card" },
+      h(
+        "div",
+        { class: "settings-card__row" },
+        h("div", { class: "settings-card__heading" }, "关闭按钮"),
+      ),
+      h(
+        "div",
+        { class: "settings-card__hint" },
+        "隐藏到托盘时计时和局域网同步继续运行；直接退出会结束进程。",
+      ),
+      element,
+    ),
+  );
+}
+
+/* ---------------- 通知权限（Android） ---------------- */
+
+function buildNotificationSection(): HTMLElement {
+  const status = h(
+    "div",
+    { class: "settings-card__hint" },
+    "正在检查通知权限…",
+  );
+  const refresh = () => {
+    void api
+      .nativeNotificationStatus()
+      .then((granted) => {
+        status.textContent = granted ? "通知权限已开启" : "通知权限未开启";
+      })
+      .catch(() => {
+        status.textContent = "无法读取通知权限状态";
+      });
+  };
+  refresh();
+
+  const request = h(
+    "button",
+    { class: "tonal-button", type: "button" },
+    "申请通知权限",
+  ) as HTMLButtonElement;
+  request.addEventListener("click", () => {
+    request.disabled = true;
+    void api
+      .nativeNotificationRequest()
+      .then(() => {
+        showToast("已请求通知权限");
+        window.setTimeout(refresh, 800);
+      })
+      .catch((error: unknown) =>
+        showToast(error instanceof Error ? error.message : "请求失败", {
+          error: true,
+        }),
+      )
+      .finally(() => {
+        window.setTimeout(() => {
+          request.disabled = false;
+        }, 900);
+      });
+  });
+
+  return h(
+    "div",
+    { class: "settings__group" },
+    h("div", { class: "settings__group-title" }, "通知"),
+    h(
+      "div",
+      { class: "settings-card" },
+      h(
+        "div",
+        { class: "settings-card__hint" },
+        "计时中会显示常驻通知，暂停、继续和结束可以直接在通知上操作。",
+      ),
+      status,
+      h("div", { class: "settings-card__actions" }, request),
+    ),
+  );
+}
+
+/* ---------------- 关于与更新 ---------------- */
+
+function copyText(text: string): void {
+  const clipboard = navigator.clipboard;
+  if (!clipboard) {
+    showToast("无法访问剪贴板，请手动选择链接");
+    return;
+  }
+  void clipboard
+    .writeText(text)
+    .then(() => showToast("链接已复制"))
+    .catch(() => showToast("复制失败，请手动选择链接", { error: true }));
+}
+
+function linkRow(label: string, url: string): HTMLElement {
+  const copy = h(
+    "button",
+    { class: "text-button", type: "button" },
+    "复制链接",
+  ) as HTMLButtonElement;
+  copy.addEventListener("click", () => copyText(url));
+  return h(
+    "div",
+    { class: "settings-card__field-row" },
+    h(
+      "div",
+      { class: "settings-card__hint settings-link" },
+      `${label}：${url}`,
+    ),
+    copy,
+  );
+}
+
+function buildAboutSection(): HTMLElement {
+  const version = h("div", { class: "settings-card__hint" }, "版本读取中…");
+  void api
+    .appVersion()
+    .then((value) => {
+      version.textContent = `当前版本：${value}`;
+    })
+    .catch(() => {
+      version.textContent = "当前版本：未知";
+    });
+
+  const result = h("div", { class: "settings-card__hint" });
+  const check = h(
+    "button",
+    { class: "tonal-button", type: "button" },
+    "检查更新",
+  ) as HTMLButtonElement;
+  check.addEventListener("click", () => {
+    check.disabled = true;
+    result.textContent = "正在检查…";
+    void api
+      .checkUpdate()
+      .then((info) => {
+        result.replaceChildren();
+        if (info.hasUpdate) {
+          result.append(
+            h("div", {}, `发现新版本 ${info.latest}（当前 ${info.current}）`),
+            h("div", { class: "settings-link" }, info.url),
+          );
+          const copy = h(
+            "button",
+            { class: "text-button", type: "button" },
+            "复制下载链接",
+          ) as HTMLButtonElement;
+          copy.addEventListener("click", () => copyText(info.url));
+          result.append(copy);
+        } else {
+          result.textContent = `已是最新版本（${info.current}）`;
+        }
+      })
+      .catch((error: unknown) => {
+        result.textContent =
+          error instanceof Error ? error.message : "检查更新失败";
+      })
+      .finally(() => {
+        check.disabled = false;
+      });
+  });
+
+  return h(
+    "div",
+    { class: "settings__group" },
+    h("div", { class: "settings__group-title" }, "关于"),
+    h(
+      "div",
+      { class: "settings-card" },
+      h(
+        "div",
+        { class: "settings-card__row" },
+        h("div", { class: "settings-card__heading" }, "Fretec StudyHall"),
+      ),
+      version,
+      h("div", { class: "settings-card__actions" }, check),
+      result,
+      linkRow("项目主页", REPO_URL),
+      linkRow("发行版", RELEASES_URL),
     ),
   );
 }
@@ -340,8 +652,8 @@ function openQrDialog(source: Source): void {
           ? await api.biliQrGenerate()
           : await api.neteaseQrGenerate();
       key = login.key;
-      const dark = cssColor("--md-sys-color-inverse-on-surface");
-      const light = cssColor("--md-sys-color-inverse-surface");
+      const dark = cssColor("--md-sys-color-qr-dark");
+      const light = cssColor("--md-sys-color-qr-light");
       img.src = await QRCode.toDataURL(login.url, {
         margin: 1,
         width: 440,

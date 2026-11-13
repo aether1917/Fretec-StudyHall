@@ -12,6 +12,7 @@ interface GeetestInstance {
   onError(callback: (error: unknown) => void): void;
   onClose(callback: () => void): void;
   getValidate(): GeetestValidate;
+  verify(): void;
 }
 
 declare global {
@@ -62,6 +63,11 @@ async function main(): Promise<void> {
   }
 
   setStatus("请完成人机验证");
+  const failTimer = window.setTimeout(() => {
+    if (!document.querySelector(".geetest_panel, .geetest_holder, canvas")) {
+      setStatus("人机验证加载失败，请关闭窗口后改用二维码登录");
+    }
+  }, 9000);
   window.initGeetest(
     {
       gt,
@@ -74,6 +80,7 @@ async function main(): Promise<void> {
     },
     (captcha) => {
       captcha.onSuccess(() => {
+        window.clearTimeout(failTimer);
         const validate = captcha.getValidate();
         void invoke("bili_captcha_result", {
           challenge: validate.geetest_challenge,
@@ -91,6 +98,11 @@ async function main(): Promise<void> {
       captcha.onClose(() => {
         void getCurrentWindow().close();
       });
+      try {
+        captcha.verify();
+      } catch {
+        setStatus("人机验证加载失败，请关闭窗口后改用二维码登录");
+      }
     },
   );
 }

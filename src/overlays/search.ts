@@ -40,10 +40,7 @@ export function openSearchOverlay(): void {
     error: "",
     token: 0,
     added: new Set(
-      store
-        .get()
-        .flow.filter((item) => item.source === "bili")
-        .map((item) => item.sourceId),
+      store.get().flow.map((item) => `${item.source}:${item.sourceId}`),
     ),
   };
 
@@ -124,6 +121,14 @@ function sourceTab(source: Source, label: string): HTMLButtonElement {
     state.hasMore = true;
     state.error = "";
     state.token += 1;
+    for (const tab of resultsEl?.ownerDocument.querySelectorAll(
+      ".search__source",
+    ) ?? []) {
+      tab.setAttribute(
+        "aria-selected",
+        String((tab as HTMLElement).dataset.source === source),
+      );
+    }
     renderResults();
     if (state.keyword.trim()) void loadNextPage();
   });

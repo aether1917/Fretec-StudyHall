@@ -142,6 +142,32 @@ pub struct AuthStore {
     pub netease: Option<NeteaseAuth>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AppSettings {
+    #[serde(default = "default_theme")]
+    pub theme: String,
+    #[serde(default = "default_close_behavior")]
+    pub close_behavior: String,
+}
+
+fn default_theme() -> String {
+    "light".to_string()
+}
+
+fn default_close_behavior() -> String {
+    "hide".to_string()
+}
+
+impl Default for AppSettings {
+    fn default() -> Self {
+        Self {
+            theme: default_theme(),
+            close_behavior: default_close_behavior(),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct AppPaths {
     pub root: PathBuf,
@@ -179,6 +205,14 @@ impl AppPaths {
 
     pub fn save_auth(&self, store: &AuthStore) -> std::io::Result<()> {
         write_json(self.path("auth.json"), store)
+    }
+
+    pub fn load_settings(&self) -> AppSettings {
+        read_json(self.path("settings.json"))
+    }
+
+    pub fn save_settings(&self, settings: &AppSettings) -> std::io::Result<()> {
+        write_json(self.path("settings.json"), settings)
     }
 }
 

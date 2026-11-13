@@ -301,19 +301,24 @@ pub async fn captcha_config(state: &AppState) -> CmdResult<CaptchaConfig> {
         .and_then(Value::as_str)
         .unwrap_or("")
         .trim();
-    let gt = data
+    // B 站把极验参数放在 data.geetest 里；兼容直接放在 data 上的旧格式。
+    let geetest = data.get("geetest").unwrap_or(data);
+    let gt = geetest
         .get("gt")
         .and_then(Value::as_str)
         .unwrap_or("")
         .trim()
         .to_string();
-    let challenge = data
+    let challenge = geetest
         .get("challenge")
         .and_then(Value::as_str)
         .unwrap_or("")
         .trim()
         .to_string();
-    let success = data.get("success").map(as_u32).unwrap_or(0);
+    let success = geetest.get("success").map(as_u32).unwrap_or(0);
+    if gt.is_empty() || challenge.is_empty() {
+        return Err(AppError::msg("验证码配置获取失败，请稍后重试"));
+    }
     Ok(CaptchaConfig {
         kind: if kind.is_empty() {
             "geetest".to_string()

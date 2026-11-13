@@ -186,6 +186,16 @@ pub struct LanStatus {
     pub error: Option<String>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UpdateInfo {
+    pub current: String,
+    pub latest: String,
+    pub has_update: bool,
+    pub url: String,
+    pub notes: String,
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Phase {
