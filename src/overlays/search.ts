@@ -1,7 +1,7 @@
-import { flowAdd, searchBili, searchNetease } from "../api";
+import { flowAdd, searchBili } from "../api";
 import { h } from "../dom";
 import { store } from "../store";
-import type { SearchPage, SearchResultItem, Source } from "../types";
+import type { SearchPage, SearchResultItem } from "../types";
 import { formatDurationLabel } from "../util/time";
 import { icon } from "../ui/icons";
 import { showToast } from "../ui/toast";
@@ -11,7 +11,6 @@ import { openPlayer, openPreview } from "./player";
 const PAGE_SIZE_MAX = 100;
 
 interface SearchState {
-  source: Source;
   keyword: string;
   page: number;
   items: SearchResultItem[];
@@ -32,7 +31,6 @@ let observer: IntersectionObserver | null = null;
 export function openSearchOverlay(): void {
   if (state) return;
   state = {
-    source: "bili",
     keyword: "",
     page: 0,
     items: [],
@@ -55,20 +53,13 @@ export function openSearchOverlay(): void {
   inputEl = h("input", {
     class: "search__field",
     type: "search",
-    placeholder: "搜索哔哩哔哩视频或网易云音乐",
+    placeholder: "搜索哔哩哔哩视频",
     "aria-label": "搜索关键词",
     autocomplete: "off",
   }) as HTMLInputElement;
   inputEl.addEventListener("input", () => onKeywordChanged());
 
   const header = h("div", { class: "search__header" }, backBtn, inputEl);
-
-  const sourceTabs = h(
-    "div",
-    { class: "search__sources" },
-    sourceTab("bili", "哔哩哔哩"),
-    sourceTab("netease", "网易云音乐"),
-  );
 
   countEl = h("div", { class: "search__count" });
   resultsEl = h("div", { class: "search__results" });
@@ -84,7 +75,6 @@ export function openSearchOverlay(): void {
     "div",
     { class: "overlay-layer search" },
     header,
-    sourceTabs,
     countEl,
     resultsEl,
   );
@@ -101,39 +91,6 @@ export function openSearchOverlay(): void {
 
   renderResults();
   inputEl.focus();
-}
-
-function sourceTab(source: Source, label: string): HTMLButtonElement {
-  const button = h(
-    "button",
-    {
-      class: "search__source",
-      type: "button",
-      "aria-selected": String(source === state?.source),
-      "data-source": source,
-    },
-    label,
-  ) as HTMLButtonElement;
-  button.addEventListener("click", () => {
-    if (!state || state.source === source) return;
-    state.source = source;
-    state.items = [];
-    state.page = 0;
-    state.hasMore = true;
-    state.error = "";
-    state.token += 1;
-    for (const tab of resultsEl?.ownerDocument.querySelectorAll(
-      ".search__source",
-    ) ?? []) {
-      tab.setAttribute(
-        "aria-selected",
-        String((tab as HTMLElement).dataset.source === source),
-      );
-    }
-    renderResults();
-    if (state.keyword.trim()) void loadNextPage();
-  });
-  return button;
 }
 
 function onKeywordChanged(): void {
@@ -167,10 +124,7 @@ async function loadNextPage(): Promise<void> {
   renderResults();
   try {
     const page = current.page + 1;
-    const result: SearchPage =
-      current.source === "bili"
-        ? await searchBili(keyword, page)
-        : await searchNetease(keyword, page);
+    const result: SearchPage = await searchBili(keyword, page);
     if (!state || token !== state.token) return;
     state.items = [...state.items, ...result.items].slice(0, PAGE_SIZE_MAX);
     state.page = page;

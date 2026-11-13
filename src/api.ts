@@ -168,6 +168,8 @@ export const nativeNotificationStatus = () =>
 export const nativeNotificationRequest = () =>
   call<void>("native_notification_request");
 export const nativeBackExit = () => call<void>("native_back_exit");
+export const nativeFocusMode = (active: boolean) =>
+  call<void>("native_focus_mode", { active });
 
 /* ---------- 局域网 ---------- */
 export const lanStatus = () => call<LanStatus>("lan_status");

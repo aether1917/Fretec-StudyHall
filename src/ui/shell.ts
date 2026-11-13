@@ -4,7 +4,6 @@ import { icon } from "./icons";
 export interface ShellRefs {
   app: HTMLDivElement;
   searchBtn: HTMLButtonElement;
-  statusDot: HTMLSpanElement;
   capsule: HTMLButtonElement;
   capsuleTime: HTMLSpanElement;
   lanBtn: HTMLButtonElement;
@@ -40,7 +39,6 @@ export function buildShell(): ShellRefs {
     icon("search"),
   );
 
-  const statusDot = h("span", { class: "status-dot", id: "status-dot" });
   const capsuleTime = h("span", { class: "capsule__time" }, "25:00");
   const capsule = h(
     "button",
@@ -50,6 +48,7 @@ export function buildShell(): ShellRefs {
       type: "button",
       "aria-label": "展开翻页钟",
       "aria-expanded": "false",
+      "data-phase": "idle",
     },
     capsuleTime,
   );
@@ -69,7 +68,7 @@ export function buildShell(): ShellRefs {
     "header",
     { class: "top-bar", id: "top-bar" },
     searchBtn,
-    h("div", { class: "top-bar__right" }, statusDot, capsule, lanBtn),
+    h("div", { class: "top-bar__right" }, capsule, lanBtn),
   );
 
   const bannerText = h("span", { class: "login-banner__text" });
@@ -185,7 +184,6 @@ export function buildShell(): ShellRefs {
   return {
     app,
     searchBtn,
-    statusDot,
     capsule,
     capsuleTime,
     lanBtn,

@@ -112,18 +112,7 @@ img {
 }
 
 .status-dot {
-  flex: 0 0 auto;
-  width: var(--md-sys-size-status-dot);
-  height: var(--md-sys-size-status-dot);
-  border-radius: var(--md-sys-shape-corner-full);
-  background: var(--md-sys-color-on-surface);
-  transition: background var(--md-sys-motion-duration-short2)
-    var(--md-sys-motion-easing-standard);
-}
-
-.status-dot[data-phase="break"] {
-  background: transparent;
-  border: 1.5px solid var(--md-sys-color-on-surface);
+  display: none;
 }
 
 .icon-btn {
@@ -190,11 +179,28 @@ img {
   background: var(--md-sys-color-surface-container-high);
 }
 
-.capsule:active {
+.capsule[data-phase="focus"] {
+  background: var(--md-sys-color-focus);
+  border-color: var(--md-sys-color-focus);
+  color: var(--md-sys-color-on-focus);
+}
+
+.capsule[data-phase="break"] {
+  background: var(--md-sys-color-break);
+  border-color: var(--md-sys-color-break);
+  color: var(--md-sys-color-on-break);
+}
+
+.capsule[data-phase="focus"]:hover,
+.capsule[data-phase="break"]:hover {
+  filter: brightness(1.08);
+}
+
+.capsule[data-phase="idle"]:active {
   background: var(--md-sys-color-surface-container-highest);
 }
 
-.capsule[aria-expanded="true"] {
+.capsule[data-phase="idle"][aria-expanded="true"] {
   background: var(--md-sys-color-surface-container-highest);
 }
 
@@ -510,30 +516,44 @@ body.bars-hidden .login-banner {
   visibility: hidden;
 }
 
-/* 纯黑扩散遮罩：只负责黑色扩散/收回 */
+/* 纯黑扩散遮罩：从胶囊位置长成整屏 */
 .veil {
   position: fixed;
-  inset: 0;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
   z-index: var(--md-sys-z-veil);
   background: var(--md-sys-color-veil);
-  clip-path: circle(0px at 50% 50%);
+  border-radius: var(--md-sys-shape-corner-full);
+  opacity: 0;
+  transform: translate3d(0, 0, 0) scale(1, 1);
+  transform-origin: center center;
   pointer-events: none;
   visibility: hidden;
+  will-change: transform, opacity;
 }
 
 .veil.is-active {
   visibility: visible;
   pointer-events: auto;
+  opacity: 1;
 }
 
 .veil.is-animating-expand {
-  transition: clip-path var(--md-sys-motion-duration-long1)
-    var(--md-sys-motion-easing-emphasized);
+  transition:
+    transform var(--md-sys-motion-duration-long1)
+      var(--md-sys-motion-easing-emphasized),
+    border-radius var(--md-sys-motion-duration-long1)
+      var(--md-sys-motion-easing-emphasized);
 }
 
 .veil.is-animating-collapse {
-  transition: clip-path var(--md-sys-motion-duration-long2)
-    var(--md-sys-motion-easing-emphasized);
+  transition:
+    transform var(--md-sys-motion-duration-long2)
+      var(--md-sys-motion-easing-emphasized),
+    border-radius var(--md-sys-motion-duration-long2)
+      var(--md-sys-motion-easing-emphasized);
 }
 
 /* 翻页钟层位于遮罩之上 */
@@ -549,6 +569,7 @@ body.bars-hidden .login-banner {
 .clock-layer.is-open {
   visibility: visible;
   pointer-events: auto;
+  background: var(--md-sys-color-veil);
 }
 
 /* ---------- Toast ---------- */

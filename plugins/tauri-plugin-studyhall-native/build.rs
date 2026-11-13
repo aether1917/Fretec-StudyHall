@@ -5,6 +5,7 @@ const COMMANDS: &[&str] = &[
     "requestNotificationPermission",
     "notificationPermissionStatus",
     "exitApp",
+    "focusMode",
 ];
 
 fn main() {

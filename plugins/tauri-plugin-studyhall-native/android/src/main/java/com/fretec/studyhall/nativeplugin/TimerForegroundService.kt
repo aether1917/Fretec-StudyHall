@@ -97,7 +97,10 @@ class TimerForegroundService : Service() {
         val endsAt = System.currentTimeMillis() + remaining
 
         val phaseLabel = if (phase == "break") "休息" else "专注"
-        val title = if (paused) "$phaseLabel · 已暂停" else phaseLabel
+        val remainingSec = (remaining / 1000L).toInt().coerceAtLeast(0)
+        val clock = "%02d:%02d".format(remainingSec / 60, remainingSec % 60)
+        val title = if (paused) "$phaseLabel · 已暂停 $clock" else "$phaseLabel · 剩余 $clock"
+        val content = if (paused) "暂停中，剩余 $clock" else "${phaseLabel}中，剩余 $clock"
 
         val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
         val contentIntent = launchIntent?.let {
@@ -125,7 +128,7 @@ class TimerForegroundService : Service() {
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(title)
-            .setContentText(if (paused) "已暂停" else "剩余时间")
+            .setContentText(content)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
             .setOngoing(true)
             .setOnlyAlertOnce(true)

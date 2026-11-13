@@ -26,24 +26,29 @@ function reducedMotion(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
-function circleRadius(cx: number, cy: number): number {
-  const corners = [
-    [0, 0],
-    [window.innerWidth, 0],
-    [0, window.innerHeight],
-    [window.innerWidth, window.innerHeight],
-  ];
-  let max = 0;
-  for (const [x, y] of corners) {
-    const distance = Math.hypot((x ?? 0) - cx, (y ?? 0) - cy);
-    if (distance > max) max = distance;
-  }
-  return max + 8;
+function placeVeil(rect: DOMRect): void {
+  if (!veilEl) return;
+  veilEl.style.left = `${rect.left}px`;
+  veilEl.style.top = `${rect.top}px`;
+  veilEl.style.width = `${rect.width}px`;
+  veilEl.style.height = `${rect.height}px`;
+  veilEl.style.borderRadius = `${rect.height / 2}px`;
+  veilEl.style.transform = "translate3d(0, 0, 0) scale(1, 1)";
 }
 
-function setCircle(radius: number, cx: number, cy: number): void {
+function expandVeil(rect: DOMRect): void {
   if (!veilEl) return;
-  veilEl.style.clipPath = `circle(${radius}px at ${cx}px ${cy}px)`;
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const dx = window.innerWidth / 2 - cx;
+  const dy = window.innerHeight / 2 - cy;
+  const scale =
+    Math.max(
+      window.innerWidth / Math.max(rect.width, 1),
+      window.innerHeight / Math.max(rect.height, 1),
+    ) * 1.08;
+  veilEl.style.borderRadius = "0px";
+  veilEl.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(${scale}, ${scale})`;
 }
 
 function nextFrame(fn: () => void): void {
@@ -51,12 +56,19 @@ function nextFrame(fn: () => void): void {
 }
 
 function onceTransition(el: HTMLElement, fn: () => void): void {
-  const handler = (event: TransitionEvent) => {
-    if (event.target !== el || event.propertyName !== "clip-path") return;
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
     el.removeEventListener("transitionend", handler);
     fn();
   };
+  const handler = (event: TransitionEvent) => {
+    if (event.target !== el || event.propertyName !== "transform") return;
+    finish();
+  };
   el.addEventListener("transitionend", handler);
+  window.setTimeout(finish, 520);
 }
 
 export function initClock(layer: HTMLDivElement, veil: HTMLDivElement): void {
@@ -172,6 +184,13 @@ export function initClock(layer: HTMLDivElement, veil: HTMLDivElement): void {
   });
 
   updateClock(store.get().timer);
+
+  // 进入全屏后窗口尺寸会变化，把已经铺满的遮罩重新撑到新的视口。
+  window.addEventListener("resize", () => {
+    if (!open || !veilEl) return;
+    const capsule = document.getElementById("capsule");
+    if (capsule) expandVeil(capsule.getBoundingClientRect());
+  });
 }
 
 export function isClockOpen(): boolean {
@@ -183,19 +202,18 @@ export function openClock(): void {
   const capsule = document.getElementById("capsule");
   if (!capsule || !veilEl || !layerEl || !clockEl) return;
   const rect = capsule.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-  const startRadius = Math.max(8, rect.height / 2);
-  const endRadius = circleRadius(cx, cy);
 
   busy = true;
   capsule.setAttribute("aria-expanded", "true");
   store.set({ overlay: "clock" });
 
+  veilEl.classList.remove(
+    "is-active",
+    "is-animating-expand",
+    "is-animating-collapse",
+  );
+  placeVeil(rect);
   veilEl.classList.add("is-active");
-  veilEl.classList.remove("is-animating-collapse");
-  veilEl.classList.add("is-animating-expand");
-  setCircle(startRadius, cx, cy);
 
   const covered = () => {
     if (!layerEl || !clockEl) return;
@@ -207,13 +225,14 @@ export function openClock(): void {
   };
 
   if (reducedMotion()) {
-    setCircle(endRadius, cx, cy);
+    expandVeil(rect);
     covered();
     return;
   }
 
+  veilEl.classList.add("is-animating-expand");
   nextFrame(() => {
-    setCircle(endRadius, cx, cy);
+    expandVeil(rect);
     onceTransition(veilEl!, covered);
   });
 }
@@ -222,11 +241,7 @@ export function closeClock(): void {
   if (busy || !open) return;
   const capsule = document.getElementById("capsule");
   if (!capsule || !veilEl || !layerEl || !clockEl) return;
-
   const rect = capsule.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-  const startRadius = Math.max(8, rect.height / 2);
   busy = true;
 
   clockEl.classList.remove("is-visible");
@@ -237,7 +252,8 @@ export function closeClock(): void {
     if (!veilEl || !layerEl || !clockEl) return;
     layerEl.classList.remove("is-open");
     veilEl.classList.remove("is-active", "is-animating-collapse");
-    veilEl.style.clipPath = "circle(0px at 50% 50%)";
+    veilEl.style.width = "0px";
+    veilEl.style.height = "0px";
     open = false;
     busy = false;
     store.set({ overlay: null });
@@ -248,14 +264,13 @@ export function closeClock(): void {
     return;
   }
 
-  const beginShrink = () => {
+  veilEl.classList.remove("is-animating-expand");
+  veilEl.classList.add("is-animating-collapse");
+  window.setTimeout(() => {
     if (!veilEl) return;
-    veilEl.classList.remove("is-animating-expand");
-    veilEl.classList.add("is-animating-collapse");
+    placeVeil(rect);
     onceTransition(veilEl, finish);
-    setCircle(startRadius, cx, cy);
-  };
-  window.setTimeout(beginShrink, 180);
+  }, 160);
 }
 
 export function updateClock(snapshot: TimerSnapshot): void {

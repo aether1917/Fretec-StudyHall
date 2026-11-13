@@ -4,16 +4,25 @@ import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import app.tauri.annotation.Command
 import app.tauri.annotation.InvokeArg
 import app.tauri.annotation.TauriPlugin
 import app.tauri.plugin.Invoke
 import app.tauri.plugin.JSObject
 import app.tauri.plugin.Plugin
+
+@InvokeArg
+class FocusArgs {
+    var active: Boolean = false
+}
 
 @InvokeArg
 class TimerArgs {
@@ -53,6 +62,35 @@ class StudyHallNativePlugin(private val activity: Activity) : Plugin(activity) {
     @Command
     fun exitApp(invoke: Invoke) {
         activity.moveTaskToBack(true)
+        invoke.resolve()
+    }
+
+    @Command
+    fun focusMode(invoke: Invoke) {
+        val args = invoke.parseArgs(FocusArgs::class.java)
+        activity.runOnUiThread {
+            val window = activity.window
+            val controller = WindowCompat.getInsetsController(window, window.decorView)
+            if (args.active) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                controller.systemBarsBehavior =
+                    WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                controller.hide(WindowInsetsCompat.Type.systemBars())
+                try {
+                    activity.startLockTask()
+                } catch (_: Exception) {
+                    /* 用户拒绝屏幕固定时只保留全屏 */
+                }
+            } else {
+                controller.show(WindowInsetsCompat.Type.systemBars())
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                try {
+                    activity.stopLockTask()
+                } catch (_: Exception) {
+                    /* 未处于固定模式 */
+                }
+            }
+        }
         invoke.resolve()
     }
 

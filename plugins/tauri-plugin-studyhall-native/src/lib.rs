@@ -13,6 +13,12 @@ pub struct TimerPayload {
     pub status: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FocusPayload {
+    pub active: bool,
+}
+
 pub struct StudyHallHandle<R: Runtime>(pub PluginHandle<R>);
 
 impl<R: Runtime> StudyHallHandle<R> {
@@ -42,6 +48,12 @@ impl<R: Runtime> StudyHallHandle<R> {
 
     pub fn exit_app(&self) {
         let _ = self.0.run_mobile_plugin::<()>("exitApp", ());
+    }
+
+    pub fn focus_mode(&self, active: bool) {
+        let _ = self
+            .0
+            .run_mobile_plugin::<()>("focusMode", FocusPayload { active });
     }
 }
 

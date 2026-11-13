@@ -34,6 +34,12 @@
   --md-sys-color-veil: #000000;
   --md-sys-color-video-surface: #000000;
 
+  /* 胶囊状态色：专注红、休息绿 */
+  --md-sys-color-focus: #c62828;
+  --md-sys-color-on-focus: #ffffff;
+  --md-sys-color-break: #2e7d32;
+  --md-sys-color-on-break: #ffffff;
+
   /* 二维码固定黑码白底，和界面明暗无关 */
   --md-sys-color-qr-dark: #141414;
   --md-sys-color-qr-light: #ffffff;
@@ -231,6 +237,10 @@
   --md-sys-color-video-surface: #000000;
   --md-sys-color-qr-dark: #141414;
   --md-sys-color-qr-light: #ffffff;
+  --md-sys-color-focus: #ef5350;
+  --md-sys-color-on-focus: #ffffff;
+  --md-sys-color-break: #66bb6a;
+  --md-sys-color-on-break: #0a0a0a;
   --md-sys-color-primary: #ededed;
   --md-sys-color-on-primary: #0a0a0a;
   --md-sys-color-primary-container: #2a2a2a;

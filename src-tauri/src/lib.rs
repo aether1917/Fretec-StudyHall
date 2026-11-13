@@ -85,6 +85,7 @@ pub fn run() {
             commands::native_notification_status,
             commands::native_notification_request,
             commands::native_back_exit,
+            commands::native_focus_mode,
             commands::timer_get,
             commands::timer_start,
             commands::timer_pause,
@@ -119,6 +120,18 @@ pub fn run() {
             #[cfg(desktop)]
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 let app = window.app_handle();
+                let timer_active = app
+                    .state::<state::AppState>()
+                    .timer
+                    .snapshot()
+                    .status
+                    != crate::types::TimerStatus::Idle;
+                if timer_active {
+                    api.prevent_close();
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                    return;
+                }
                 let behavior = app
                     .state::<state::AppState>()
                     .settings

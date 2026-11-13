@@ -264,6 +264,19 @@ pub fn native_back_exit(app: AppHandle) {
     let _ = app;
 }
 
+#[tauri::command]
+pub fn native_focus_mode(app: AppHandle, active: bool) {
+    #[cfg(target_os = "android")]
+    {
+        if let Some(handle) = app
+            .try_state::<tauri_plugin_studyhall_native::StudyHallHandle<tauri::Wry>>()
+        {
+            handle.focus_mode(active);
+        }
+    }
+    let _ = (app, active);
+}
+
 /* ---------------- 计时 ---------------- */
 
 #[tauri::command]
