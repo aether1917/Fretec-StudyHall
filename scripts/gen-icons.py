@@ -247,5 +247,5 @@ def build_production(icon: Image.Image):
 
 if __name__ == "__main__":
     build_options()
-    build_production(option_flip(1024))
+    build_production(option_flow(1024))
     print("icons written to", OPTIONS)
