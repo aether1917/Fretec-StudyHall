@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use crate::error::{AppError, CmdResult};
 use crate::proxy::{ProxyServer, ProxyTarget};
 use crate::state::AppState;
-use crate::types::{MediaPayload, QualityInfo, Source};
+use crate::types::{FlowItem, MediaPayload, Progress, QualityInfo, SearchResultItem, Source};
 
 const BILI_REFERER: &str = "https://www.bilibili.com";
 const NETEASE_REFERER: &str = "https://music.163.com";
@@ -49,7 +49,40 @@ impl MediaService {
                 .cloned()
                 .ok_or_else(|| AppError::msg("该条目已不在学习流中"))?
         };
+        self.resolve_flow_item(state, item, quality).await
+    }
 
+    /// 直接播放搜索结果，不要求先加入学习流。
+    pub async fn preview(
+        &self,
+        state: &AppState,
+        result: &SearchResultItem,
+        quality: u32,
+    ) -> CmdResult<MediaPayload> {
+        let source_key = match result.source {
+            Source::Bili => "bili",
+            Source::Netease => "netease",
+        };
+        let item = FlowItem {
+            id: format!("preview:{source_key}:{}", result.source_id),
+            source: result.source,
+            source_id: result.source_id.clone(),
+            title: result.title.clone(),
+            author: result.author.clone(),
+            cover: result.cover.clone(),
+            duration_sec: result.duration_sec,
+            added_at: 0,
+            progress: Progress::default(),
+        };
+        self.resolve_flow_item(state, item, quality).await
+    }
+
+    async fn resolve_flow_item(
+        &self,
+        state: &AppState,
+        item: FlowItem,
+        quality: u32,
+    ) -> CmdResult<MediaPayload> {
         let requested = match quality {
             16 | 64 | 80 => quality,
             _ => 64,

@@ -6,8 +6,10 @@
 
 - 计时：专注 25 分钟、休息 5 分钟循环，自动切换。点胶囊会从胶囊位置扩散出一块纯黑，铺满后显示翻页钟；再点缩小会收回去。暂停、继续、结束后状态同步到托盘和 Android 通知。
 - 学习流：卡片可以长按拖动排序，右滑超过 30% 会停在滑开状态，点删除移除。卡片底部有播放进度条。
-- 播放器：B 站视频走本地代理，补上 Referer 和 UA；画质 360P / 720P / 1080P，倍速 0.5x 到 2.0x；返回后播放器收到迷你条里，进度按秒记在本地，下次打开接着播。
-- 搜索：顶栏左上角打开搜索层，来源在哔哩哔哩和网易云之间切换。B 站请求带 WBI 签名，网易云走 weapi 加密；500ms 防抖，滚动分页，最多 100 条。计时中不能添加。
+- 播放器：B 站视频走本地代理，补上 Referer 和 UA；画质 360P / 720P / 1080P，倍速 0.5x 到 2.0x；返回后播放器收到迷你条里，进度按秒记在本地，下次打开接着播。搜索结果点一下就直接试听或试看，点“添加”才进学习流。播放器里有播放列表，打开学习流条目时列表是学习流，从搜索打开时列表是当前搜索结果。网易云只有倍速，没有画质选项。
+- 返回：桌面端 Esc 或播放器返回键逐层关闭浮层；Android 返回键先关浮层，再切回学习流，最后才退到桌面，不会一按就退出。
+- 搜索：顶栏左上角打开搜索层，来源在哔哩哔哩和网易云之间切换。B 站请求带 WBI 签名，网易云走 weapi 加密；500ms 防抖，滚动分页，最多 100 条。计时中不能添加，但可以点结果直接播放。
+- 网易云播放：优先用 weapi 拿地址，拿不到（未登录、无版权）时退回公开的外链播放接口试一次，仍然不行就提示换一首。
 - 登录：两家都支持二维码和手机验证码，Android 额外有手机号加密码。B 站人机验证在应用内的独立窗口里完成。
 - 局域网：UDP 广播发现，TCP 长连接，只同步倒计时状态，最多 4 台。计时进行中不允许新建连接，学习流和播放进度不同步。
 - 托盘和通知：Windows/Linux 关窗口后留在托盘，单击显示或隐藏，菜单里有退出；Android 用前台服务维护常驻通知。
@@ -22,6 +24,8 @@
 ![设置](docs/screenshots/04-settings.png)
 ![深色设置](docs/screenshots/08-dark-settings.png)
 ![检查更新](docs/screenshots/09-update-check.png)
+![网易云试听](docs/screenshots/11-netease-player.png)
+![播放列表](docs/screenshots/12-playlist.png)
 
 ## 目录
 
@@ -94,17 +98,18 @@ Rust：`tauri` 提供窗口、托盘、命令和事件；`tokio` 跑异步任务
 
 ## 数据
 
-Windows 存在 `%APPDATA%\com.fretec.studyhall\`，Android 在应用私有目录。`flow.json` 存学习流、排序和播放进度，`device.json` 存设备名，`auth.json` 存登录 cookie。凭据只在 Rust 侧读写，不返回前端，也不写日志。
+Windows 存在 `%APPDATA%\com.fretec.studyhall\`，Android 在应用私有目录。`flow.json` 存学习流、排序和播放进度，`device.json` 存设备名，`settings.json` 存外观和关闭行为，`auth.json` 存登录 cookie。凭据只在 Rust 侧读写，不返回前端，也不写日志。
 
 ## 本机验证情况
 
-Windows 上跑过：启动、两个页面切换、胶囊展开和收回、开始/暂停/继续、B 站真实搜索和添加、卡片打开播放器并播放、返回后迷你条出现、`flow.json` 里进度正常写入；浅色和深色切换、检查更新、关闭窗口行为也实际点过。`cargo test` 50 个测试通过，`cargo clippy -D warnings` 通过，`pnpm typecheck` 和 `pnpm build` 通过，`node scripts/check-tokens.mjs` 通过。产物是 `out/Fretec StudyHall_0.1.0-beta.1_x64-setup.exe` 和 `out/Fretec-StudyHall-0.1.0-beta.1-arm64.apk`。
+Windows 上跑过：启动、两个页面切换、胶囊展开和收回、开始/暂停/继续、B 站真实搜索和添加、网易云真实搜索和试听、搜索结果直接播放、播放列表切歌、卡片打开播放器并播放、返回后迷你条出现、`flow.json` 里进度正常写入；浅色和深色切换、检查更新、关闭窗口行为也实际点过。`cargo test` 50 个测试通过，`cargo clippy -D warnings` 通过，`pnpm typecheck` 和 `pnpm build` 通过，`node scripts/check-tokens.mjs` 通过。产物是 `out/Fretec StudyHall_0.2.0-beta.1_x64-setup.exe` 和 `out/Fretec-StudyHall-0.2.0-beta.1-arm64.apk`。
 
-没条件验证的：扫码、短信、密码登录和极验验证（需要真实账号）；局域网两台设备之间的发现和同步（只有代码和单元测试）；Android 真机上的通知和权限弹窗；托盘悬停提示的实际效果；Linux 打包。
+没条件验证的：扫码、短信、密码登录和极验验证（需要真实账号）；局域网两台设备之间的发现和同步（只有代码和单元测试）；Android 真机上的返回键、通知和权限弹窗；托盘悬停提示的实际效果；Linux 打包。
 
 ## 已知问题
 
 - B 站和网易云用的都是非官方接口，会改版，也可能触发风控。出错时会给出中文提示，不会崩。
+- 网易云的会员曲目仍然拿不到播放地址，只能换一首；免费曲目走公开外链接口，可以正常试听。
 - B 站短信和密码登录依赖 geetest 的组件，加载失败时只能改用二维码。
 - 部分 Linux 发行版的 WebView 没有 H.264 解码，B 站视频可能放不了。
 - 局域网同步是明文 JSON，没有认证，只适合可信的内网。
@@ -113,3 +118,4 @@ Windows 上跑过：启动、两个页面切换、胶囊展开和收回、开始
 ## 授权
 
 Fredoka 字体按 SIL OFL 1.1 使用。代码目前没有声明开源协议。
+

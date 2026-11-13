@@ -65,6 +65,8 @@ export const flowProgressSave = (
 /* ---------- 媒体 ---------- */
 export const mediaResolve = (itemId: string, quality: number) =>
   call<MediaPayload>("media_resolve", { itemId, quality });
+export const mediaPreview = (item: SearchResultItem, quality: number) =>
+  call<MediaPayload>("media_preview", { item, quality });
 export const mediaClose = () => call<void>("media_close");
 
 /* ---------- 搜索 ---------- */
@@ -165,6 +167,7 @@ export const nativeNotificationStatus = () =>
   call<boolean>("native_notification_status");
 export const nativeNotificationRequest = () =>
   call<void>("native_notification_request");
+export const nativeBackExit = () => call<void>("native_back_exit");
 
 /* ---------- 局域网 ---------- */
 export const lanStatus = () => call<LanStatus>("lan_status");

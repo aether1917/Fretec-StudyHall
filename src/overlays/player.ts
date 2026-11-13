@@ -1,7 +1,7 @@
-import { flowProgressSave, mediaClose, mediaResolve } from "../api";
+import { flowProgressSave, mediaClose, mediaPreview, mediaResolve } from "../api";
 import { h } from "../dom";
 import { store } from "../store";
-import type { MediaPayload, MiniState } from "../types";
+import type { FlowItem, MediaPayload, MiniState, SearchResultItem, Source } from "../types";
 import { formatTime } from "../util/time";
 import { icon } from "../ui/icons";
 import { showToast } from "../ui/toast";
@@ -22,8 +22,20 @@ const SPEEDS = [
   { value: 2, label: "2.0x" },
 ] as const;
 
+interface PlayTarget {
+  key: string;
+  flowId: string | null;
+  source: Source;
+  sourceId: string;
+  title: string;
+  author: string;
+  cover: string;
+  durationSec: number;
+}
+
 interface Session {
   itemId: string;
+  flowId: string | null;
   payload: MediaPayload;
   video: HTMLVideoElement | null;
   audio: HTMLAudioElement | null;
@@ -55,6 +67,7 @@ let session: Session | null = null;
 let overlayEl: HTMLElement | null = null;
 let ui: PlayerUi | null = null;
 let resolveToken = 0;
+let playlist: PlayTarget[] = [];
 
 export const playerBridge = {
   subscribe(listener: MiniListener): () => void {
@@ -92,10 +105,10 @@ function emit(): void {
 
 function syncFlowProgress(): void {
   const current = session;
-  if (!current) return;
+  if (!current || !current.flowId) return;
   let changed = false;
   const next = store.get().flow.map((item) => {
-    if (item.id !== current.itemId) return item;
+    if (item.id !== current.flowId) return item;
     if (
       Math.abs(item.progress.positionSec - current.position) < 1 &&
       Math.abs(item.durationSec - (current.duration || item.durationSec)) < 1
@@ -274,14 +287,14 @@ function bindMedia(current: Session): void {
 
 async function persistProgress(force: boolean): Promise<void> {
   const current = session;
-  if (!current) return;
+  if (!current || !current.flowId) return;
   const now = Date.now();
   if (!force && now - current.lastSavedAt < 1000) return;
   current.lastSavedAt = now;
   current.position = currentTimeOf(current);
   current.duration = durationOf(current);
   try {
-    await flowProgressSave(current.itemId, current.position, current.duration);
+    await flowProgressSave(current.flowId, current.position, current.duration);
   } catch {
     /* 进度保存失败不打断播放 */
   }
@@ -294,11 +307,51 @@ function seekTo(current: Session, seconds: number): void {
   current.position = target;
 }
 
-async function startSession(itemId: string, quality: number): Promise<void> {
-  const payload = await mediaResolve(itemId, quality);
+function targetOfFlow(item: FlowItem): PlayTarget {
+  return {
+    key: item.id,
+    flowId: item.id,
+    source: item.source,
+    sourceId: item.sourceId,
+    title: item.title,
+    author: item.author,
+    cover: item.cover,
+    durationSec: item.durationSec,
+  };
+}
+
+function targetOfSearch(item: SearchResultItem): PlayTarget {
+  return {
+    key: `preview:${item.source}:${item.sourceId}`,
+    flowId: null,
+    source: item.source,
+    sourceId: item.sourceId,
+    title: item.title,
+    author: item.author,
+    cover: item.cover,
+    durationSec: item.durationSec,
+  };
+}
+
+function searchItemOf(target: PlayTarget): SearchResultItem {
+  return {
+    source: target.source,
+    sourceId: target.sourceId,
+    title: target.title,
+    author: target.author,
+    cover: target.cover,
+    durationSec: target.durationSec,
+  };
+}
+
+async function startSession(target: PlayTarget, quality: number): Promise<void> {
+  const payload = target.flowId
+    ? await mediaResolve(target.flowId, quality)
+    : await mediaPreview(searchItemOf(target), quality);
   const { video, audio } = createMedia(payload);
   const current: Session = {
-    itemId,
+    itemId: target.key,
+    flowId: target.flowId,
     payload,
     video,
     audio,
@@ -330,13 +383,13 @@ function teardownSession(): void {
   emit();
 }
 
-export async function openPlayer(itemId: string): Promise<void> {
+async function openTarget(target: PlayTarget, quality = 64): Promise<void> {
   if (store.get().overlay !== null) return;
 
-  if (!session || session.itemId !== itemId) {
+  if (!session || session.itemId !== target.key) {
     teardownSession();
     try {
-      await startSession(itemId, 64);
+      await startSession(target, quality);
     } catch (error) {
       showToast(error instanceof Error ? error.message : "无法打开该内容", {
         error: true,
@@ -366,6 +419,91 @@ export async function openPlayer(itemId: string): Promise<void> {
   await play();
 }
 
+export async function openPlayer(itemId: string): Promise<void> {
+  const flow = store.get().flow;
+  const item = flow.find((entry) => entry.id === itemId);
+  if (!item) return;
+  playlist = flow.map(targetOfFlow);
+  await openTarget(targetOfFlow(item), 64);
+}
+
+export async function openPreview(
+  item: SearchResultItem,
+  results: SearchResultItem[],
+): Promise<void> {
+  playlist = results.map(targetOfSearch);
+  if (!playlist.some((entry) => entry.key === targetOfSearch(item).key)) {
+    playlist.unshift(targetOfSearch(item));
+  }
+  await openTarget(targetOfSearch(item), 64);
+}
+
+export async function resumePlayer(): Promise<void> {
+  if (!session || store.get().overlay !== null) return;
+  buildOverlay();
+  if (!overlayEl) return;
+  const opened = showOverlay("player", overlayEl, () => {
+    overlayEl = null;
+    ui = null;
+    if (session?.video) mediaHost().append(session.video);
+    if (session?.audio) mediaHost().append(session.audio);
+    emit();
+  });
+  if (!opened) {
+    overlayEl = null;
+    return;
+  }
+  if (session?.video) ui?.stage.append(session.video);
+}
+
+function renderPlaylist(panel: HTMLElement): void {
+  panel.replaceChildren();
+  panel.append(
+    h(
+      "div",
+      { class: "player__playlist-heading" },
+      `播放列表 · ${playlist.length} 项`,
+    ),
+  );
+  const list = h("div", { class: "player__playlist-list" });
+  for (const entry of playlist) {
+    const active = session?.itemId === entry.key;
+    const row = h(
+      "button",
+      {
+        class: "player__playlist-item",
+        type: "button",
+        "aria-current": active ? "true" : "false",
+      },
+      h(
+        "div",
+        { class: "player__playlist-text" },
+        h("div", { class: "player__playlist-name" }, entry.title),
+        h(
+          "div",
+          { class: "player__playlist-meta" },
+          `${entry.source === "bili" ? "B站" : "网易云"} · ${entry.author}`,
+        ),
+      ),
+    ) as HTMLButtonElement;
+    if (active) {
+      row.append(h("span", { class: "player__playlist-active" }, "播放中"));
+    }
+    row.addEventListener("click", () => {
+      panel.hidden = true;
+      if (active) return;
+      const quality = session?.quality ?? 64;
+      closeOverlay();
+      // 等浮层淡出、管理器清空 active 后再打开下一条。
+      window.setTimeout(() => {
+        void openTarget(entry, quality);
+      }, 400);
+    });
+    list.append(row);
+  }
+  panel.append(list);
+}
+
 function buildOverlay(): void {
   if (overlayEl) return;
   const current = session;
@@ -379,11 +517,25 @@ function buildOverlay(): void {
   backBtn.addEventListener("click", () => closeOverlay());
 
   const title = h("div", { class: "player__title" }, current.payload.title);
+  const playlistBtn = h(
+    "button",
+    { class: "text-button player__playlist-btn", type: "button" },
+    "列表",
+  ) as HTMLButtonElement;
+  const playlistPanel = h("div", {
+    class: "player__playlist",
+    hidden: "",
+  });
+  playlistBtn.addEventListener("click", () => {
+    playlistPanel.hidden = !playlistPanel.hidden;
+    if (!playlistPanel.hidden) renderPlaylist(playlistPanel);
+  });
   const header = h(
     "div",
     { class: "player__header" },
     backBtn,
     title,
+    playlistBtn,
   );
 
   const stage = h("div", { class: "player__stage" });
@@ -474,12 +626,19 @@ function buildOverlay(): void {
       { class: "player__buttons" },
       playBtn,
       h("div", { class: "player__spacer" }),
-      qualityAnchor,
+      ...(current.payload.kind === "audio" ? [] : [qualityAnchor]),
       speedAnchor,
     ),
   );
 
-  overlayEl = h("div", { class: "player" }, header, stage, controls);
+  overlayEl = h(
+    "div",
+    { class: "player" },
+    header,
+    playlistPanel,
+    stage,
+    controls,
+  );
   ui = {
     stage,
     current: currentLabel,

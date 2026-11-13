@@ -8,6 +8,99 @@
 }
 
 .player__header {
+  position: relative;
+  z-index: 2;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--md-sys-space-3);
+  padding: var(--md-sys-space-2) var(--md-sys-space-3);
+}
+
+.player__playlist-btn {
+  flex: 0 0 auto;
+}
+
+.player__playlist {
+  position: absolute;
+  inset: calc(var(--md-sys-size-top-bar) + 8px) var(--md-sys-space-4)
+    var(--md-sys-space-4);
+  z-index: 5;
+  overflow-y: auto;
+  padding: var(--md-sys-space-3);
+  border-radius: var(--md-sys-shape-corner-large);
+  background: var(--md-sys-color-surface-container);
+  box-shadow: var(--md-sys-elevation-3);
+}
+
+.player__playlist[hidden] {
+  display: none;
+}
+
+.player__playlist-heading {
+  padding: var(--md-sys-space-2) var(--md-sys-space-2) var(--md-sys-space-3);
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+}
+
+.player__playlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.player__playlist-item {
+  display: flex;
+  align-items: center;
+  gap: var(--md-sys-space-3);
+  width: 100%;
+  min-height: var(--md-sys-size-touch-target);
+  padding: var(--md-sys-space-2);
+  border: 0;
+  border-radius: var(--md-sys-shape-corner-medium);
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  text-align: left;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.player__playlist-item:hover {
+  background: var(--md-sys-color-state-hover);
+}
+
+.player__playlist-item[aria-current="true"] {
+  background: var(--md-sys-color-surface-container-highest);
+}
+
+.player__playlist-text {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.player__playlist-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
+
+.player__playlist-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-body-small-size);
+}
+
+.player__playlist-active {
+  flex: 0 0 auto;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-label-small-size);
+}
+
+.player__header {
   display: flex;
   align-items: center;
   gap: var(--md-sys-space-2);

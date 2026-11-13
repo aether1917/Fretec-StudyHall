@@ -251,6 +251,19 @@ pub fn native_notification_request(app: AppHandle) {
     let _ = app;
 }
 
+#[tauri::command]
+pub fn native_back_exit(app: AppHandle) {
+    #[cfg(target_os = "android")]
+    {
+        if let Some(handle) = app
+            .try_state::<tauri_plugin_studyhall_native::StudyHallHandle<tauri::Wry>>()
+        {
+            handle.exit_app();
+        }
+    }
+    let _ = app;
+}
+
 /* ---------------- 计时 ---------------- */
 
 #[tauri::command]
@@ -429,6 +442,15 @@ pub async fn media_resolve(
     quality: u32,
 ) -> CmdResult<MediaPayload> {
     state.media.resolve(state.inner(), &item_id, quality).await
+}
+
+#[tauri::command]
+pub async fn media_preview(
+    state: State<'_, AppState>,
+    item: SearchResultItem,
+    quality: u32,
+) -> CmdResult<MediaPayload> {
+    state.media.preview(state.inner(), &item, quality).await
 }
 
 #[tauri::command]

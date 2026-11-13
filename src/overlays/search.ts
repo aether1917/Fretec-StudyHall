@@ -6,6 +6,7 @@ import { formatDurationLabel } from "../util/time";
 import { icon } from "../ui/icons";
 import { showToast } from "../ui/toast";
 import { closeOverlay, showOverlay } from "./manager";
+import { openPlayer, openPreview } from "./player";
 
 const PAGE_SIZE_MAX = 100;
 
@@ -261,11 +262,12 @@ function buildResult(item: SearchResultItem): HTMLElement {
   ) as HTMLButtonElement;
 
   const row = h(
-    "button",
+    "div",
     {
       class: "search-result",
-      type: "button",
-      "aria-label": `添加 ${item.title}`,
+      role: "button",
+      tabindex: "0",
+      "aria-label": `播放 ${item.title}`,
     },
     cover,
     h(
@@ -282,9 +284,32 @@ function buildResult(item: SearchResultItem): HTMLElement {
       ),
     ),
     action,
-  ) as HTMLButtonElement;
+  ) as HTMLElement;
 
-  row.addEventListener("click", () => {
+  const playResult = () => {
+    if (!state) return;
+    const results = state.items.slice();
+    const existing = store
+      .get()
+      .flow.find(
+        (entry) =>
+          entry.source === item.source && entry.sourceId === item.sourceId,
+      );
+    closeOverlay();
+    if (existing) {
+      void openPlayer(existing.id);
+    } else {
+      void openPreview(item, results);
+    }
+  };
+  row.addEventListener("click", playResult);
+  row.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    playResult();
+  });
+  action.addEventListener("click", (event) => {
+    event.stopPropagation();
     if (!state || state.added.has(`${item.source}:${item.sourceId}`)) return;
     void addItem(item, row, action);
   });
@@ -293,23 +318,21 @@ function buildResult(item: SearchResultItem): HTMLElement {
 
 async function addItem(
   item: SearchResultItem,
-  row: HTMLButtonElement,
+  _row: HTMLElement,
   action: HTMLButtonElement,
 ): Promise<void> {
   if (!state) return;
   const key = `${item.source}:${item.sourceId}`;
   if (state.added.has(key)) return;
-  row.disabled = true;
+  action.disabled = true;
   action.textContent = "添加中";
   try {
     const created = await flowAdd(item);
     state.added.add(key);
     store.set({ flow: [...store.get().flow, created] });
     action.textContent = "已添加";
-    action.disabled = true;
-    showToast("已加入学习流");
   } catch (error) {
-    row.disabled = false;
+    action.disabled = false;
     action.textContent = "添加";
     showToast(error instanceof Error ? error.message : "添加失败", {
       error: true,

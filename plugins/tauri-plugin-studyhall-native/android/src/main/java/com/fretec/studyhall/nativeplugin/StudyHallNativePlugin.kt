@@ -4,6 +4,8 @@ import android.Manifest
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import app.tauri.annotation.Command
@@ -37,6 +39,21 @@ class StudyHallNativePlugin(private val activity: Activity) : Plugin(activity) {
 
     override fun load(webView: android.webkit.WebView) {
         super.load(webView)
+        val component = activity as? ComponentActivity ?: return
+        component.onBackPressedDispatcher.addCallback(
+            component,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    trigger("backPressed", JSObject())
+                }
+            },
+        )
+    }
+
+    @Command
+    fun exitApp(invoke: Invoke) {
+        activity.moveTaskToBack(true)
+        invoke.resolve()
     }
 
     @Command

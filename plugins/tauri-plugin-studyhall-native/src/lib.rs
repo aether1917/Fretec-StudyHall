@@ -39,6 +39,10 @@ impl<R: Runtime> StudyHallHandle<R> {
             .run_mobile_plugin::<bool>("notificationPermissionStatus", ())
             .unwrap_or(false)
     }
+
+    pub fn exit_app(&self) {
+        let _ = self.0.run_mobile_plugin::<()>("exitApp", ());
+    }
 }
 
 pub fn init<R: Runtime>() -> TauriPlugin<R> {

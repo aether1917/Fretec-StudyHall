@@ -8,9 +8,9 @@ import { renderFlowPage } from "./views/flow";
 import { renderSettingsPage } from "./views/settings";
 import { openSearchOverlay } from "./overlays/search";
 import { openLanOverlay } from "./overlays/lan";
-import { openPlayer, playerBridge, togglePlayback } from "./overlays/player";
+import { playerBridge, resumePlayer, togglePlayback } from "./overlays/player";
 import { icon } from "./ui/icons";
-import { authStatus, flowList, lanStatus, onEvent, timerGet, timerPause, timerResume, timerStop } from "./api";
+import { authStatus, flowList, lanStatus, nativeBackExit, onEvent, timerGet, timerPause, timerResume, timerStop } from "./api";
 import type {
   AuthStatus,
   LanStatus,
@@ -32,12 +32,31 @@ export async function boot(): Promise<void> {
   wireEvents();
   wireBanner();
   wireMini();
+  if (/Android/i.test(navigator.userAgent)) {
+    void onEvent("plugin:studyhall-native:backPressed", handleAndroidBack);
+  }
 
   await loadInitialState();
 
   renderPage();
   window.setInterval(tick, 250);
   tick();
+}
+
+function handleAndroidBack(): void {
+  if (isClockOpen()) {
+    closeClock();
+    return;
+  }
+  if (store.get().overlay !== null) {
+    closeOverlay();
+    return;
+  }
+  if (store.get().page !== "flow") {
+    setPage("flow");
+    return;
+  }
+  void nativeBackExit().catch(() => undefined);
 }
 
 function wireShell(): void {
@@ -264,6 +283,6 @@ function wireMini(): void {
   refs.mini.addEventListener("click", () => {
     const mini = store.get().mini;
     if (!mini) return;
-    void openPlayer(mini.itemId);
+    void resumePlayer();
   });
 }

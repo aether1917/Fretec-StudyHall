@@ -4,6 +4,7 @@ const COMMANDS: &[&str] = &[
     "stopTimer",
     "requestNotificationPermission",
     "notificationPermissionStatus",
+    "exitApp",
 ];
 
 fn main() {
