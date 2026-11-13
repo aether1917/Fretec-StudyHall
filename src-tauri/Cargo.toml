@@ -18,7 +18,6 @@ tauri = { version = "2", features = ["tray-icon", "image-png"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "net", "time", "io-util"] }
-reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "gzip", "brotli", "deflate", "charset", "http2", "native-tls"] }
 axum = "0.8"
 http = "1"
 futures-util = "0.3"
@@ -39,8 +38,12 @@ bytes = "1"
 
 [target.'cfg(target_os = "android")'.dependencies]
 tauri-plugin-studyhall-native = { path = "../plugins/tauri-plugin-studyhall-native" }
+# Android 没有可用的 OpenSSL 开发包，使用 rustls（ring 用 NDK clang 交叉编译）。
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "gzip", "brotli", "deflate", "charset", "http2", "rustls-tls"] }
 
-[target.'cfg(not(any(target_os = "android", target_os = "ios")))'.dependencies]
+[target.'cfg(not(target_os = "android"))'.dependencies]
+# 桌面端使用系统 TLS（Windows schannel / Linux openssl），避免额外 C 工具链。
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "gzip", "brotli", "deflate", "charset", "http2", "native-tls"] }
 
 # 免装 Visual Studio 的构建环境：vswhom-sys 的 C++ 探测用纯 Rust 空实现替代。
 # embed-resource 在探测失败后会回退到路径中的 rc.exe（本机由 scripts 提供）。

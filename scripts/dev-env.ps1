@@ -39,3 +39,27 @@ if (-not $env:NDK_HOME -and (Test-Path (Join-Path $sdkRoot 'ndk'))) {
         Sort-Object Name -Descending | Select-Object -First 1
     if ($ndk) { $env:NDK_HOME = $ndk.FullName }
 }
+
+# Android cross compilation: point cc-rs (ring for rustls) and cargo at NDK clang.
+if ($env:NDK_HOME) {
+    $llvmBin = Join-Path $env:NDK_HOME 'toolchains\llvm\prebuilt\windows-x86_64\bin'
+    if (Test-Path $llvmBin) {
+        $targets = @{
+            'aarch64_linux_android'           = 'aarch64-linux-android24-clang.cmd'
+            'armv7_linux_androideabi'         = 'armv7a-linux-androideabi24-clang.cmd'
+            'i686_linux_android'              = 'i686-linux-android24-clang.cmd'
+            'x86_64_linux_android'            = 'x86_64-linux-android24-clang.cmd'
+        }
+        foreach ($key in $targets.Keys) {
+            $clang = Join-Path $llvmBin $targets[$key]
+            if (Test-Path $clang) {
+                Set-Item -Path "env:CC_$key" -Value $clang
+                Set-Item -Path "env:AR_$key" -Value (Join-Path $llvmBin 'llvm-ar.exe')
+            }
+        }
+        $env:CARGO_TARGET_AARCH64_LINUX_ANDROID_LINKER = Join-Path $llvmBin 'aarch64-linux-android24-clang.cmd'
+        $env:CARGO_TARGET_ARMV7_LINUX_ANDROIDEABI_LINKER = Join-Path $llvmBin 'armv7a-linux-androideabi24-clang.cmd'
+        $env:CARGO_TARGET_I686_LINUX_ANDROID_LINKER = Join-Path $llvmBin 'i686-linux-android24-clang.cmd'
+        $env:CARGO_TARGET_X86_64_LINUX_ANDROID_LINKER = Join-Path $llvmBin 'x86_64-linux-android24-clang.cmd'
+    }
+}

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use tauri::plugin::{Builder, PluginHandle, TauriPlugin};
-use tauri::Runtime;
+use tauri::{Manager, Runtime};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
