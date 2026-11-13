@@ -1,228 +1,104 @@
 # Fretec StudyHall
 
-番茄钟 + 学习流的跨端应用：Rust + Tauri v2 一套代码构建 Windows / Linux / Android。
-纯黑单色界面，右上角常驻翻页钟胶囊，可拖拽排序的学习流，内置播放器（画质 / 倍速 / 进度续播），
-B 站与网易云搜索、扫码 / 手机验证码 / 密码登录，局域网倒计时同步，桌面托盘与 Android 常驻通知。
+一个番茄钟加学习流的桌面/移动应用，用 Rust + Tauri v2 写，一套代码构建 Windows、Linux 和 Android。界面是纯黑单色，右上角是翻页钟胶囊，底部是学习流和设置两个页面，学习流里可以放 B 站视频和网易云音乐，点开就能在应用内播放。
 
-## 功能
+现在做出来的东西：
 
-- **计时**：专注 25 分钟 / 短休息 5 分钟循环，阶段自动切换；胶囊点击纯黑圆形扩散展开翻页钟；暂停 / 继续 / 结束。
-- **学习流**：B 站视频与网易云音乐条目，长按拖动排序、右滑删除、封面进度条，空态引导。
-- **播放器**：全屏覆盖层，B 站 DASH 双轨（视频 + 音频）或网易云单轨音频，360P / 720P / 1080P、0.5x–2.0x 倍速、进度续播（±2s），关闭后迷你播放条停在底栏上方。
-- **搜索**：哔哩哔哩（WBI 签名）与网易云（weapi 加密），500ms 防抖、分页、已添加标记；计时中锁定添加入口。
-- **登录**：两家均支持二维码与手机验证码；Android 额外支持手机号 + 密码；B 站人机验证在应用内完成；登录态过期提示条。
-- **局域网**：UDP 广播发现 + TCP 长连接，仅同步倒计时状态，最多 4 台，计时中双向禁止新连接。
-- **系统集成**：Windows / Linux 托盘（关闭窗口隐藏、tooltip 显示阶段与剩余时间、菜单退出）；Android 前台服务常驻通知（系统计时器递减、暂停 / 继续 / 结束、点击回应用）。
-- **数据**：学习流、顺序、播放进度、设备名、登录凭据由 Rust 写入应用数据目录的 JSON；凭据不返回前端、不写日志。
+- 计时：专注 25 分钟、休息 5 分钟循环，自动切换。点胶囊会从胶囊位置扩散出一块纯黑，铺满后显示翻页钟；再点缩小会收回去。暂停、继续、结束后状态同步到托盘和 Android 通知。
+- 学习流：卡片可以长按拖动排序，右滑超过 30% 会停在滑开状态，点删除移除。卡片底部有播放进度条。
+- 播放器：B 站视频走本地代理，补上 Referer 和 UA；画质 360P / 720P / 1080P，倍速 0.5x 到 2.0x；返回后播放器收到迷你条里，进度按秒记在本地，下次打开接着播。
+- 搜索：顶栏左上角打开搜索层，来源在哔哩哔哩和网易云之间切换。B 站请求带 WBI 签名，网易云走 weapi 加密；500ms 防抖，滚动分页，最多 100 条。计时中不能添加。
+- 登录：两家都支持二维码和手机验证码，Android 额外有手机号加密码。B 站人机验证在应用内的独立窗口里完成。
+- 局域网：UDP 广播发现，TCP 长连接，只同步倒计时状态，最多 4 台。计时进行中不允许新建连接，学习流和播放进度不同步。
+- 托盘和通知：Windows/Linux 关窗口后留在托盘，单击显示或隐藏，菜单里有退出；Android 用前台服务维护常驻通知。
 
-## 目录结构
+## 目录
 
 ```
-index.html / captcha.html      前端入口（Vite 多页）
-src/                           TypeScript 前端（原生 TS + M3 令牌）
-src/styles/tokens.css          唯一色值来源（--md-sys-*）
-src-tauri/                     Rust 后端（Tauri v2）
-src-tauri/src/bili/            B 站 WBI / 搜索 / playurl / 扫码 / 短信 / 密码登录
-src-tauri/src/netease/         网易云 weapi / 搜索 / 播放地址 / 登录
-src-tauri/src/lan/             局域网发现与倒计时同步
-src-tauri/src/proxy.rs         127.0.0.1 视频代理（补 Referer / UA、Range 透传）
-src-tauri/src/timer.rs         计时状态机（Rust 为唯一真源）
-plugins/tauri-plugin-studyhall-native/   Android 前台服务插件（Rust + Kotlin）
-scripts/                       打包 / 工具链 / Gitee 绑定 / 令牌检查
-out/                           安装包产物（不进 git）
+src/                     前端，TypeScript，没有框架
+src/styles/tokens.css    颜色、圆角、字号等设计令牌
+src-tauri/               Rust 侧和 Tauri 配置
+src-tauri/src/bili/      B 站搜索、取流、扫码/短信/密码登录
+src-tauri/src/netease/   网易云 weapi、搜索、播放地址、登录
+src-tauri/src/lan/       局域网发现和倒计时同步
+src-tauri/src/proxy.rs   127.0.0.1 上的视频代理
+src-tauri/src/timer.rs   计时状态机
+plugins/                 Android 前台服务插件（Kotlin）
+scripts/                 打包、初始化环境、Gitee 绑定、颜色令牌检查
+out/                     安装包输出目录
 ```
 
-## 环境要求
+## 构建
 
-| 平台 | 依赖 |
-| --- | --- |
-| 通用 | Node.js ≥ 20、pnpm ≥ 9、Rust stable（rustup） |
-| Windows | MSVC Build Tools 2022（VCTools + Windows SDK）、WebView2 Runtime |
-| Linux | `libwebkit2gtk-4.1-dev`、`libappindicator3-dev`、`librsvg2-dev`、`patchelf`、GTK3 |
-| Android | JDK 17、Android SDK（platform 35 / build-tools 35）、NDK r27、Rust Android targets |
+需要 Node 20 以上、pnpm、Rust stable。Windows 还要 MSVC Build Tools 和 WebView2；Linux 要 webkit2gtk 4.1、libappindicator3、librsvg2、patchelf；Android 要 JDK 17、Android SDK 36、NDK r27 和四个 Android target。
 
-本机（Windows 10）已验证的安装方式：
-
-```powershell
-winget install Microsoft.VisualStudio.2022.BuildTools -e --override "--quiet --wait --norestart --nocache --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended --add Microsoft.VisualStudio.Component.Windows11SDK.22621"
-winget install Rustlang.Rustup -e
-rustup default stable-x86_64-pc-windows-msvc
-pnpm install
-```
-
-Android 额外环境（JDK 17 + SDK/NDK + Rust targets）：
-
-```powershell
-winget install EclipseAdoptium.Temurin.17.JDK -e
-powershell -ExecutionPolicy Bypass -File scripts/setup-android.ps1
-```
-
-## 开发与构建
+前端：
 
 ```powershell
 pnpm install
-pnpm dev                 # 前端 dev server（Tauri dev 时会自动使用）
-pnpm tauri dev           # 桌面开发模式
-pnpm typecheck           # TypeScript 检查
-pnpm build               # 前端生产构建（含 captcha 页）
-node scripts/check-tokens.mjs   # 设计令牌检查：tokens.css 之外不允许色值
-cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
+pnpm typecheck
+pnpm build
 cargo test --manifest-path src-tauri/Cargo.toml
+cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
 ```
 
-### Windows 安装包
+Windows 安装包：
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/package-windows.ps1
 ```
 
-脚本会先预热 NSIS 工具链（`%LOCALAPPDATA%\tauri\NSIS`，经 gh-proxy 下载并校验 SHA1），
-再执行 `pnpm tauri build --bundles nsis`，把安装包复制到 `out/`。
+脚本会先把 NSIS 3.13 和插件放到 `%LOCALAPPDATA%\tauri\NSIS`（本机访问不了 GitHub，走 gh-proxy 下载并校验 SHA1），再执行 `pnpm tauri build --bundles nsis`，最后把安装包复制到 `out/`。
 
-### Android APK
+Android：
 
 ```powershell
-$env:JAVA_HOME="C:\Program Files\Eclipse Adoptium\jdk-17..."
-$env:ANDROID_HOME="$env:LOCALAPPDATA\Android\Sdk"
-$env:NDK_HOME="$env:ANDROID_HOME\ndk\27.2.12479018"
+powershell -ExecutionPolicy Bypass -File scripts/setup-android.ps1
+pnpm tauri android init
 powershell -ExecutionPolicy Bypass -File scripts/package-android.ps1
 ```
 
-产物复制到 `out/`。首次构建前需要初始化 Android 工程：
+这台机器没开 Windows 开发者模式，Tauri CLI 往 jniLibs 放 .so 时要用符号链接，会失败。所以我改成手动跑一遍：先 `cargo build --target aarch64-linux-android --release --lib`，把 `.so` 复制进 `src-tauri/gen/android/app/src/main/jniLibs/arm64-v8a/`，再把 `buildSrc` 里 `BuildTask.kt` 的执行体改成空实现，直接 `gradle assembleArm64Release`。签名配置写在 `gen/android/app/build.gradle.kts` 里，读的是 `keystore.properties`。这些文件都在 `gen/` 下，不进 git；重新 init 后要重新改一遍。开启开发者模式的机器直接 `pnpm tauri android build --apk` 就行。
 
-```powershell
-pnpm tauri android init
-```
-
-> **Windows 未开启开发者模式时**：Tauri CLI 会用符号链接把 `.so` 放进 `jniLibs`，没有
-> `SeCreateSymbolicLinkPrivilege` 会失败。本机采用等价流程（无需管理员权限）：
->
-> 1. `cargo build --manifest-path src-tauri/Cargo.toml --target aarch64-linux-android --release --lib --features tauri/custom-protocol`
-> 2. 复制 `src-tauri/target/aarch64-linux-android/release/libfretec_studyhall_lib.so` 到
->    `src-tauri/gen/android/app/src/main/jniLibs/arm64-v8a/`
-> 3. 在 `src-tauri/gen/android/app/build.gradle.kts` 中把 `compileSdk` 设为 36、加上
->    `keystore.properties` 签名配置；把 `buildSrc` 里的 `BuildTask.kt` 改为空实现，
->    然后运行 `gradle assembleArm64Release`（`gen/` 为生成目录，不提交 git）。
->
-> 本机通过该流程产出 `out/Fretec-StudyHall-0.1.0-arm64.apk`（自签 keystore 位于
-> `%USERPROFILE%\.tools\fretec-studyhall.keystore`，不写入仓库）。正常开启开发者模式
-> 的机器可直接使用 `pnpm tauri android build --apk`。
-
-### Linux
+Linux：
 
 ```bash
 sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf libgtk-3-dev
 pnpm install && pnpm tauri build --bundles deb,appimage
 ```
 
-CI（`.github/workflows/build.yml`）同时构建 Windows / Linux / Android 产物。
+`.github/workflows/build.yml` 里有一套三端的构建流程，本机没有 Linux 环境，没跑过。
 
-## 第三方依赖清单
+另外，这台机器装 VS Build Tools 时被 Microsoft CDN 卡住了，所以桌面构建用的是另一种办法：xwin 下载 MSVC CRT 和 Windows SDK，rustup 自带的 `rust-lld` 改名成 `lld-link.exe` 当链接器，`rc.exe` 从 NuGet 的 `Microsoft.Windows.SDK.BuildTools` 里取，`scripts/dev-env.ps1` 负责设置这些环境变量。`src-tauri/vendor/vswhom-sys` 是为了绕开 `embed-resource` 对 C++ 编译器的依赖写的空实现。正常装了 VS Build Tools 的机器不需要这些。
 
-### 前端（package.json）
+`src-tauri/build.rs` 没有用 tauri-build 默认的 manifest 嵌入，因为那个只链接到二进制目标，单元测试里链接 tauri 会找不到 Common Controls v6，一启动就 `STATUS_ENTRYPOINT_NOT_FOUND`。现在改成对所有 Windows 链接目标统一用 `rustc-link-arg` 嵌入 `windows-app-manifest.xml`。
 
-| 依赖 | 用途 |
-| --- | --- |
-| `@tauri-apps/api` | 前端调用 Rust 命令与事件 |
-| `@tauri-apps/cli` | Tauri 开发 / 构建 CLI |
-| `qrcode` | 登录二维码生成 |
-| `vite` | 前端构建与 dev server |
-| `typescript` | 类型检查 |
+## 依赖
 
-字体：`Fredoka`（SIL OFL 1.1，见 `public/fonts/OFL.txt`），仅翻页钟数字使用。
+前端：`@tauri-apps/api` 调 Rust 命令和事件；`@tauri-apps/cli` 是构建工具；`qrcode` 生成登录二维码；`vite` 构建；`typescript` 做类型检查。
 
-### Rust（Cargo.toml）
+Rust：`tauri` 提供窗口、托盘、命令和事件；`tokio` 跑异步任务、局域网和计时循环；`reqwest` 请求第三方接口（桌面用系统 TLS，Android 用 rustls）；`axum` 起本地代理；`serde`/`serde_json` 处理数据和本地 JSON；`md5` 做 WBI 签名和网易云密码摘要；`aes`/`cbc` 做 weapi 加密；`rsa`/`num-bigint` 做网易云裸 RSA 和 B 站 RSA-OAEP；`base64`、`urlencoding`、`percent-encoding` 做编码；`uuid` 生成条目和代理 key；`thiserror` 统一错误。
 
-| crate | 用途 |
-| --- | --- |
-| `tauri` | 应用框架、窗口、托盘、命令与事件 |
-| `tokio` | 异步运行时、局域网 TCP/UDP、计时循环 |
-| `reqwest` | 第三方 HTTP 请求（B 站 / 网易云） |
-| `axum` | 本地视频代理 HTTP 服务 |
-| `serde` / `serde_json` | 数据模型与本地 JSON 持久化 |
-| `md5` | WBI 签名、网易云密码摘要 |
-| `sha2` | RSA-OAEP 摘要、SHA1 校验辅助 |
-| `aes` / `cbc` | 网易云 weapi AES-128-CBC |
-| `rsa` / `num-bigint` | 网易云无填充 RSA、B 站 RSA-OAEP |
-| `base64` / `urlencoding` / `percent-encoding` | 编码 |
-| `rand` | 随机密钥、设备 id |
-| `uuid` | 条目 / 代理 key |
-| `bytes` | 代理流式响应 |
-| `http` | 代理头处理 |
-| `thiserror` | 统一错误类型 |
+字体是 Fredoka（SIL OFL 1.1，见 `public/fonts/OFL.txt`），只用在翻页钟数字上。
 
-### 系统工具
+## 数据
 
-| 工具 | 用途 |
-| --- | --- |
-| NSIS 3.13 + `nsis_tauri_utils.dll` | Windows 安装包（Tauri bundler 缓存） |
-| Android SDK / NDK / JDK 17 | Android 构建 |
+Windows 存在 `%APPDATA%\com.fretec.studyhall\`，Android 在应用私有目录。`flow.json` 存学习流、排序和播放进度，`device.json` 存设备名，`auth.json` 存登录 cookie。凭据只在 Rust 侧读写，不返回前端，也不写日志。
 
-## 构建环境说明
+## 本机验证情况
 
-标准环境下安装 Visual Studio Build Tools 2022 即可，无需额外配置。本仓库当前开发机在下载
-VS BuildTools 时受到 Microsoft CDN 限速/中断影响，因此改用**无需安装 Visual Studio** 的构建方式，
-仅用于保证本机可重复构建；对正常环境没有影响，可忽略：
+Windows 上跑过：启动、两个页面切换、胶囊展开和收回、开始/暂停/继续、B 站真实搜索和添加、卡片打开播放器并播放、返回后迷你条出现、`flow.json` 里进度正常写入。`cargo test` 50 个测试通过，`cargo clippy -D warnings` 通过，`pnpm typecheck` 和 `pnpm build` 通过，`node scripts/check-tokens.mjs` 通过。产物是 `out/Fretec StudyHall_0.0.1-beta.1_x64-setup.exe` 和 `out/Fretec-StudyHall-0.0.1-beta.1-arm64.apk`。
 
-- 用 `xwin 0.10.0` 下载 MSVC CRT + Windows SDK 到 `%USERPROFILE%\.xwin`（不含编译器）；
-- 用 rustup 自带的 `rust-lld` 复制为 `lld-link.exe` 作为链接器；
-- 用 NuGet `Microsoft.Windows.SDK.BuildTools` 里的 `rc.exe` 编译 Windows 资源；
-- `src-tauri/vendor/vswhom-sys` 是纯 Rust 替代实现（原 crate 需要 C++ 编译器；`embed-resource`
-  在探测失败后会回退到 `RC` 环境变量与 `PATH` 中的 `rc.exe`）；
-- `scripts/dev-env.ps1` 负责探测并设置上述环境变量（`RC`、`CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER`、
-  `RUSTFLAGS=-Lnative=...`），`package-windows.ps1` / `package-android.ps1` 会先加载它。
+没条件验证的：扫码、短信、密码登录和极验验证（需要真实账号）；局域网两台设备之间的发现和同步（只有代码和单元测试）；Android 真机上的通知和权限弹窗；托盘悬停提示的实际效果；Linux 打包。
 
-`src-tauri/build.rs` 关闭了 tauri-build 默认清单嵌入，改为对所有链接目标（包括单元测试）
-统一嵌入 `windows-app-manifest.xml`（Common Controls v6），否则链接 tauri 的测试二进制
-会以 `STATUS_ENTRYPOINT_NOT_FOUND` 退出。
+## 已知问题
 
-## 界面截图（本机实际运行）
+- B 站和网易云用的都是非官方接口，会改版，也可能触发风控。出错时会给出中文提示，不会崩。
+- B 站短信和密码登录依赖 geetest 的组件，加载失败时只能改用二维码。
+- 部分 Linux 发行版的 WebView 没有 H.264 解码，B 站视频可能放不了。
+- 局域网同步是明文 JSON，没有认证，只适合可信的内网。
+- 翻页钟数字用的是随包字体，其他文字走系统字体。
 
-| 学习流空态 | 翻页钟（纯黑扩散展开） | 计时中 |
-| --- | --- | --- |
-| ![](docs/screenshots/01-study-flow-empty.png) | ![](docs/screenshots/02-flip-clock.png) | ![](docs/screenshots/03-timer-running.png) |
+## 授权
 
-| 设置页 | 搜索真实结果 | 播放器 |
-| --- | --- | --- |
-| ![](docs/screenshots/04-settings.png) | ![](docs/screenshots/05-search-results.png) | ![](docs/screenshots/06-player.png) |
-
-| 迷你播放条 |
-| --- |
-| ![](docs/screenshots/07-mini-player.png) |
-
-## 本机验证记录（Windows 10 x64）
-
-已验证：
-
-- `cargo test`：45+ 单元测试通过（WBI 签名向量、weapi 加解密、Rust/网易云错误码、局域网帧、计时状态机、搜索解析等）。
-- `cargo clippy --all-targets -- -D warnings` 通过；`pnpm typecheck` / `pnpm build` 通过；颜色令牌检查通过。
-- `scripts/package-windows.ps1` 产出 `out/Fretec StudyHall_0.1.0_x64-setup.exe`，体积约 3.3 MB。
-- 启动应用、顶栏/底栏布局、学习流空态、设置页、计时胶囊纯黑扩散展开翻页钟、点击开始 / 暂停 / 继续、缩小回胶囊读数一致。
-- 哔哩哔哩真实搜索（WBI 签名）返回列表，封面加载正常，添加条目后学习流出现卡片。
-- 卡片打开全屏播放器，B 站 DASH 视频经本地代理播放，进度条 / 时间 / 720P / 倍速控件正常；返回后迷你播放条出现，`flow.json` 记录进度（本机实测 position ≈ 36s）。
-- Android：`AndroidManifest` 合并、Kotlin 前台服务插件编译、Rust `aarch64-linux-android` 交叉编译、Rustls TLS；产出 `out/Fretec-StudyHall-0.1.0-arm64.apk` 并用自签 keystore 签名（`apksigner verify` 通过）。
-
-未在本机验证（需真实账号 / 第二台设备 / Android 真机 / Linux 主机）：
-
-- 扫码登录、短信验证码登录、密码登录、极验人机验证的真实账号流程。
-- 局域网双设备发现与倒计时同步（本机仅有代码与单元测试）。
-- Android 常驻通知、通知按钮与权限弹窗的真机行为。
-- 系统托盘悬停提示、托盘单击显隐的真机交互（托盘创建由代码保证，无法用截图验证）。
-- Linux `.deb` / AppImage 构建（由 CI 工作流覆盖）。
-
-## 数据位置
-
-Windows：`%APPDATA%\com.fretec.studyhall\`，包含 `flow.json`（学习流与进度）、`device.json`（设备名）、
-`auth.json`（登录凭据，仅 Rust 读写）、`settings.json`。Android 使用应用私有目录。
-
-## 已知限制与未验证项
-
-- B 站 WBI / 网易云 weapi 均为非官方接口，存在风控、限流与改版风险；接口失败会给出中文错误，不崩溃。
-- B 站短信 / 密码登录依赖极验人机验证组件（`https://static.geetest.com`），需要真实账号验证；组件加载失败时可用二维码登录。
-- 本机无第二台设备与 Android 真机，局域网双机同步与 Android 通知行为仅通过代码与单元测试验证。
-- Linux 安装包由 CI 构建，本机未验证。
-- 部分 Linux 发行版 WebView 缺少 H.264 解码，B 站视频可能无法播放。
-
-## 许可证
-
-字体 Fredoka 使用 SIL OFL 1.1；其余代码未声明许可证。
+Fredoka 字体按 SIL OFL 1.1 使用。代码目前没有声明开源协议。
