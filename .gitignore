@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# build output
+dist/
+src-tauri/target/
+out/
+
+# tauri generated mobile projects + signing (never commit)
+src-tauri/gen/
+*.keystore
+keystore.properties
+
+# local logs / OS junk
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

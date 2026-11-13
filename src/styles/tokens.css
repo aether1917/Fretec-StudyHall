@@ -1,0 +1,197 @@
+/*
+ * Fretec StudyHall — Material 3 设计令牌（单色暗色）
+ *
+ * 规则：全应用仅此处允许出现具体色值；组件与页面只能消费 --md-sys-*。
+ * 色板限定为纯黑 / 深灰 / 浅灰，界面内不出现彩色。
+ */
+:root {
+  color-scheme: dark;
+
+  /* ---------- Color: surface / background ---------- */
+  --md-sys-color-background: #000000;
+  --md-sys-color-on-background: #ededed;
+  --md-sys-color-surface: #0a0a0a;
+  --md-sys-color-surface-container-lowest: #000000;
+  --md-sys-color-surface-container-low: #0f0f0f;
+  --md-sys-color-surface-container: #141414;
+  --md-sys-color-surface-container-high: #1c1c1c;
+  --md-sys-color-surface-container-highest: #242424;
+  --md-sys-color-surface-variant: #1c1c1c;
+  --md-sys-color-surface-dim: #0a0a0a;
+  --md-sys-color-surface-bright: #2a2a2a;
+
+  /* ---------- Color: text / icons ---------- */
+  --md-sys-color-on-surface: #ededed;
+  --md-sys-color-on-surface-variant: #a8a8a8;
+  --md-sys-color-on-surface-muted: #6e6e6e;
+  --md-sys-color-inverse-surface: #ededed;
+  --md-sys-color-inverse-on-surface: #0a0a0a;
+
+  /* ---------- Color: lines / outlines ---------- */
+  --md-sys-color-outline: #3a3a3a;
+  --md-sys-color-outline-variant: #262626;
+  --md-sys-color-scrim: #000000;
+  --md-sys-color-veil: #000000;
+
+  /* ---------- Color: primary / secondary / tertiary（单色体系） ---------- */
+  --md-sys-color-primary: #ededed;
+  --md-sys-color-on-primary: #0a0a0a;
+  --md-sys-color-primary-container: #2a2a2a;
+  --md-sys-color-on-primary-container: #ededed;
+  --md-sys-color-secondary: #a8a8a8;
+  --md-sys-color-on-secondary: #0a0a0a;
+  --md-sys-color-secondary-container: #1c1c1c;
+  --md-sys-color-on-secondary-container: #ededed;
+  --md-sys-color-tertiary: #a8a8a8;
+  --md-sys-color-on-tertiary: #0a0a0a;
+
+  /* ---------- Color: state / error（仍保持无彩色） ---------- */
+  --md-sys-color-error: #ededed;
+  --md-sys-color-on-error: #0a0a0a;
+  --md-sys-color-error-container: #2a2a2a;
+  --md-sys-color-on-error-container: #ededed;
+  --md-sys-color-surface-tint: #ededed;
+
+  /* ---------- Color: 透明态（令牌化的半透明黑 / 白） ---------- */
+  --md-sys-color-state-hover: rgba(255, 255, 255, 0.08);
+  --md-sys-color-state-pressed: rgba(255, 255, 255, 0.12);
+  --md-sys-color-state-focus: rgba(255, 255, 255, 0.16);
+  --md-sys-color-surface-translucent: rgba(10, 10, 10, 0.92);
+  --md-sys-color-overlay-scrim: rgba(0, 0, 0, 0.72);
+
+  /* ---------- Shape（4dp 栅格） ---------- */
+  --md-sys-shape-corner-none: 0px;
+  --md-sys-shape-corner-extra-small: 4px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-extra-large: 24px;
+  --md-sys-shape-corner-full: 999px;
+
+  /* ---------- Spacing（4dp 栅格） ---------- */
+  --md-sys-space-0: 0px;
+  --md-sys-space-1: 4px;
+  --md-sys-space-2: 8px;
+  --md-sys-space-3: 12px;
+  --md-sys-space-4: 16px;
+  --md-sys-space-5: 20px;
+  --md-sys-space-6: 24px;
+  --md-sys-space-8: 32px;
+  --md-sys-space-10: 40px;
+  --md-sys-space-12: 48px;
+  --md-sys-space-16: 64px;
+
+  /* ---------- Typescale（M3 命名） ---------- */
+  --md-sys-typescale-font-family-plain: system-ui, -apple-system, "Segoe UI",
+    "Noto Sans SC", "Microsoft YaHei", sans-serif;
+  --md-sys-typescale-font-family-brand: "Fredoka", system-ui, sans-serif;
+
+  --md-sys-typescale-display-large-size: 57px;
+  --md-sys-typescale-display-large-line-height: 64px;
+  --md-sys-typescale-display-large-weight: 400;
+  --md-sys-typescale-display-large-tracking: -0.25px;
+
+  --md-sys-typescale-display-medium-size: 45px;
+  --md-sys-typescale-display-medium-line-height: 52px;
+  --md-sys-typescale-display-medium-weight: 400;
+  --md-sys-typescale-display-medium-tracking: 0px;
+
+  --md-sys-typescale-display-small-size: 36px;
+  --md-sys-typescale-display-small-line-height: 44px;
+  --md-sys-typescale-display-small-weight: 400;
+  --md-sys-typescale-display-small-tracking: 0px;
+
+  --md-sys-typescale-headline-large-size: 32px;
+  --md-sys-typescale-headline-large-line-height: 40px;
+  --md-sys-typescale-headline-large-weight: 600;
+  --md-sys-typescale-headline-large-tracking: 0px;
+
+  --md-sys-typescale-headline-medium-size: 28px;
+  --md-sys-typescale-headline-medium-line-height: 36px;
+  --md-sys-typescale-headline-medium-weight: 600;
+  --md-sys-typescale-headline-medium-tracking: 0px;
+
+  --md-sys-typescale-headline-small-size: 24px;
+  --md-sys-typescale-headline-small-line-height: 32px;
+  --md-sys-typescale-headline-small-weight: 600;
+  --md-sys-typescale-headline-small-tracking: 0px;
+
+  --md-sys-typescale-title-large-size: 22px;
+  --md-sys-typescale-title-large-line-height: 28px;
+  --md-sys-typescale-title-large-weight: 600;
+  --md-sys-typescale-title-large-tracking: 0px;
+
+  --md-sys-typescale-title-medium-size: 16px;
+  --md-sys-typescale-title-medium-line-height: 24px;
+  --md-sys-typescale-title-medium-weight: 600;
+  --md-sys-typescale-title-medium-tracking: 0.15px;
+
+  --md-sys-typescale-title-small-size: 14px;
+  --md-sys-typescale-title-small-line-height: 20px;
+  --md-sys-typescale-title-small-weight: 600;
+  --md-sys-typescale-title-small-tracking: 0.1px;
+
+  --md-sys-typescale-body-large-size: 16px;
+  --md-sys-typescale-body-large-line-height: 24px;
+  --md-sys-typescale-body-large-weight: 400;
+  --md-sys-typescale-body-large-tracking: 0.5px;
+
+  --md-sys-typescale-body-medium-size: 14px;
+  --md-sys-typescale-body-medium-line-height: 20px;
+  --md-sys-typescale-body-medium-weight: 400;
+  --md-sys-typescale-body-medium-tracking: 0.25px;
+
+  --md-sys-typescale-body-small-size: 12px;
+  --md-sys-typescale-body-small-line-height: 16px;
+  --md-sys-typescale-body-small-weight: 400;
+  --md-sys-typescale-body-small-tracking: 0.4px;
+
+  --md-sys-typescale-label-large-size: 14px;
+  --md-sys-typescale-label-large-line-height: 20px;
+  --md-sys-typescale-label-large-weight: 600;
+  --md-sys-typescale-label-large-tracking: 0.1px;
+
+  --md-sys-typescale-label-medium-size: 12px;
+  --md-sys-typescale-label-medium-line-height: 16px;
+  --md-sys-typescale-label-medium-weight: 500;
+  --md-sys-typescale-label-medium-tracking: 0.5px;
+
+  --md-sys-typescale-label-small-size: 11px;
+  --md-sys-typescale-label-small-line-height: 16px;
+  --md-sys-typescale-label-small-weight: 500;
+  --md-sys-typescale-label-small-tracking: 0.5px;
+
+  /* ---------- Motion（M3 emphasized） ---------- */
+  --md-sys-motion-duration-short1: 50ms;
+  --md-sys-motion-duration-short2: 100ms;
+  --md-sys-motion-duration-short4: 200ms;
+  --md-sys-motion-duration-medium2: 300ms;
+  --md-sys-motion-duration-long1: 320ms;
+  --md-sys-motion-duration-long2: 280ms;
+  --md-sys-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --md-sys-motion-easing-accelerate: cubic-bezier(0.3, 0, 1, 1);
+
+  /* ---------- Elevation（无彩色阴影） ---------- */
+  --md-sys-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.6);
+  --md-sys-elevation-2: 0 2px 8px rgba(0, 0, 0, 0.6);
+  --md-sys-elevation-3: 0 8px 24px rgba(0, 0, 0, 0.7);
+
+  /* ---------- 组件尺寸（4dp 栅格） ---------- */
+  --md-sys-size-touch-target: 48px;
+  --md-sys-size-icon: 24px;
+  --md-sys-size-top-bar: 56px;
+  --md-sys-size-bottom-nav: 64px;
+  --md-sys-size-mini-player: 56px;
+  --md-sys-size-capsule-width: 92px;
+  --md-sys-size-capsule-height: 36px;
+  --md-sys-size-status-dot: 8px;
+  --md-sys-z-content: 0;
+  --md-sys-z-overlay: 30;
+  --md-sys-z-mini: 20;
+  --md-sys-z-veil: 40;
+  --md-sys-z-clock: 41;
+  --md-sys-z-sheet: 50;
+  --md-sys-z-toast: 60;
+}

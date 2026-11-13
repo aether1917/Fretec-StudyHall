@@ -1,0 +1,116 @@
+/* 翻页钟覆盖层（纯黑扩散铺满后浮出） */
+
+.clock {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--md-sys-space-10);
+  background: transparent;
+  padding: env(safe-area-inset-top) var(--md-sys-space-6)
+    env(safe-area-inset-bottom);
+  opacity: 0;
+  transition: opacity var(--md-sys-motion-duration-short4)
+    var(--md-sys-motion-easing-standard);
+}
+
+.clock.is-visible {
+  opacity: 1;
+}
+
+.clock__close {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + var(--md-sys-space-1));
+  right: var(--md-sys-space-2);
+  width: var(--md-sys-size-touch-target);
+  height: var(--md-sys-size-touch-target);
+}
+
+.clock__stage {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: var(--md-sys-space-3);
+  width: min(100%, 560px);
+  padding: 0 var(--md-sys-space-2);
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.flip-card {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  aspect-ratio: 5 / 7;
+  overflow: hidden;
+  border-radius: var(--md-sys-shape-corner-extra-large);
+  background: var(--md-sys-color-surface-container);
+  display: grid;
+  place-items: center;
+}
+
+/* 卡片中心的横向分隔线 */
+.flip-card::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  top: 50%;
+  height: 2px;
+  margin-top: -1px;
+  background: var(--md-sys-color-outline-variant);
+  pointer-events: none;
+}
+
+.flip-card__digits {
+  position: relative;
+  z-index: 1;
+  font-family: var(--md-sys-typescale-font-family-brand);
+  font-size: clamp(56px, 21vw, 128px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--md-sys-color-on-surface);
+  font-feature-settings: "tnum" 1;
+}
+
+.clock__hint {
+  min-height: 20px;
+  font-size: var(--md-sys-typescale-label-medium-size);
+  letter-spacing: var(--md-sys-typescale-label-medium-tracking);
+  color: var(--md-sys-color-on-surface-muted);
+  text-align: center;
+}
+
+.clock__controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom) + var(--md-sys-space-10));
+  display: flex;
+  justify-content: center;
+  gap: var(--md-sys-space-3);
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity var(--md-sys-motion-duration-short4)
+      var(--md-sys-motion-easing-standard),
+    transform var(--md-sys-motion-duration-short4)
+      var(--md-sys-motion-easing-standard);
+}
+
+.clock__controls.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.clock__controls .filled-button,
+.clock__controls .tonal-button {
+  min-width: 112px;
+}

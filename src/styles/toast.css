@@ -1,0 +1,9 @@
+/* Toast 补充样式（基础样式见 base.css） */
+
+.toast.is-error {
+  border-color: var(--md-sys-color-on-surface-variant);
+}
+
+.toast.is-long {
+  line-height: 1.5;
+}

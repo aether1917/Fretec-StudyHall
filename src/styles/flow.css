@@ -1,0 +1,198 @@
+/* 学习流页面 */
+
+.flow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--md-sys-space-3);
+}
+
+.flow-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--md-sys-space-3);
+  min-height: 46vh;
+  padding: 0 var(--md-sys-space-6);
+  text-align: center;
+  color: var(--md-sys-color-on-surface-muted);
+}
+
+.flow-empty__icon {
+  width: 48px;
+  height: 48px;
+  color: var(--md-sys-color-outline);
+}
+
+.flow-empty__title {
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.flow-empty__text {
+  font-size: var(--md-sys-typescale-body-medium-size);
+  line-height: 1.6;
+}
+
+/* 行容器：右滑露出删除按钮 */
+.flow-row {
+  position: relative;
+  border-radius: var(--md-sys-shape-corner-large);
+  overflow: hidden;
+  background: var(--md-sys-color-surface-container-high);
+}
+
+.flow-row__delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 96px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  cursor: pointer;
+}
+
+.flow-row__delete:hover {
+  background: var(--md-sys-color-outline-variant);
+}
+
+.flow-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) 40px;
+  gap: var(--md-sys-space-3);
+  align-items: center;
+  padding: var(--md-sys-space-3);
+  padding-bottom: calc(var(--md-sys-space-3) + 4px);
+  border-radius: var(--md-sys-shape-corner-large);
+  background: var(--md-sys-color-surface-container);
+  touch-action: pan-y;
+  cursor: pointer;
+  will-change: transform;
+  transition: transform var(--md-sys-motion-duration-short4)
+      var(--md-sys-motion-easing-standard),
+    background var(--md-sys-motion-duration-short2)
+      var(--md-sys-motion-easing-standard);
+}
+
+.flow-card:hover {
+  background: var(--md-sys-color-surface-container-high);
+}
+
+.flow-card.is-dragging {
+  cursor: grabbing;
+  background: var(--md-sys-color-surface-container-high);
+  transition: none;
+}
+
+.flow-card.is-dragging-origin {
+  opacity: 0.35;
+}
+
+.flow-card__cover {
+  position: relative;
+  width: 96px;
+  height: 54px;
+  border-radius: var(--md-sys-shape-corner-small);
+  overflow: hidden;
+  background: var(--md-sys-color-surface-container-high);
+}
+
+.flow-card__cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.flow-card__cover-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--md-sys-color-on-surface-muted);
+}
+
+.flow-card__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.flow-card__title {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: var(--md-sys-typescale-title-small-size);
+  font-weight: var(--md-sys-typescale-title-small-weight);
+  line-height: 1.35;
+  color: var(--md-sys-color-on-surface);
+}
+
+.flow-card__meta {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-muted);
+}
+
+.flow-card__source {
+  flex: 0 0 auto;
+  padding: 0 6px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-extra-small);
+  font-size: 10px;
+  line-height: 16px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.flow-card__handle {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  color: var(--md-sys-color-on-surface-muted);
+  cursor: grab;
+  touch-action: none;
+}
+
+.flow-card__handle:active {
+  cursor: grabbing;
+}
+
+.flow-card__progress {
+  position: absolute;
+  left: var(--md-sys-space-3);
+  right: var(--md-sys-space-3);
+  bottom: 6px;
+  height: 2px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-outline-variant);
+  overflow: hidden;
+}
+
+.flow-card__progress > span {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: var(--md-sys-color-on-surface-variant);
+}
+
+/* 拖拽中的浮层占位 */
+.flow-placeholder {
+  border-radius: var(--md-sys-shape-corner-large);
+  border: 1px dashed var(--md-sys-color-outline);
+  background: transparent;
+}

@@ -1,0 +1,129 @@
+/* 多设备互联覆盖层 */
+
+.lan {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.lan__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  padding: var(--md-sys-space-2) var(--md-sys-space-4)
+    calc(env(safe-area-inset-bottom) + var(--md-sys-space-6));
+  display: flex;
+  flex-direction: column;
+  gap: var(--md-sys-space-4);
+  scrollbar-width: none;
+}
+
+.lan__body::-webkit-scrollbar {
+  display: none;
+}
+
+.lan__self {
+  display: flex;
+  flex-direction: column;
+  gap: var(--md-sys-space-1);
+  padding: var(--md-sys-space-4);
+  border-radius: var(--md-sys-shape-corner-large);
+  background: var(--md-sys-color-surface-container);
+}
+
+.lan__label {
+  font-size: var(--md-sys-typescale-label-small-size);
+  letter-spacing: var(--md-sys-typescale-label-small-tracking);
+  color: var(--md-sys-color-on-surface-muted);
+}
+
+.lan__device-name {
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-sys-typescale-title-medium-weight);
+  color: var(--md-sys-color-on-surface);
+  word-break: break-all;
+}
+
+.lan__status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--md-sys-space-3);
+  padding: var(--md-sys-space-2) 0;
+}
+
+.lan__status-text {
+  font-size: var(--md-sys-typescale-body-medium-size);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.lan__unavailable {
+  padding: var(--md-sys-space-4);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-medium);
+  color: var(--md-sys-color-on-surface-muted);
+  font-size: var(--md-sys-typescale-body-small-size);
+  line-height: 1.6;
+}
+
+.lan__section-title {
+  font-size: var(--md-sys-typescale-label-medium-size);
+  letter-spacing: var(--md-sys-typescale-label-medium-tracking);
+  color: var(--md-sys-color-on-surface-muted);
+  padding: 0 var(--md-sys-space-1);
+}
+
+.lan__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--md-sys-space-2);
+}
+
+.lan__device {
+  display: flex;
+  align-items: center;
+  gap: var(--md-sys-space-3);
+  padding: var(--md-sys-space-3) var(--md-sys-space-4);
+  border-radius: var(--md-sys-shape-corner-medium);
+  background: var(--md-sys-color-surface-container);
+}
+
+.lan__device-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.lan__device-name-row {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: var(--md-sys-typescale-body-large-size);
+  color: var(--md-sys-color-on-surface);
+}
+
+.lan__device-state {
+  display: flex;
+  align-items: center;
+  gap: var(--md-sys-space-1);
+  font-size: var(--md-sys-typescale-body-small-size);
+  color: var(--md-sys-color-on-surface-muted);
+}
+
+.lan__online-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-on-surface);
+}
+
+.lan__online-dot--offline {
+  background: transparent;
+  border: 1px solid var(--md-sys-color-on-surface-muted);
+}
+
+.lan__empty {
+  padding: var(--md-sys-space-6) var(--md-sys-space-4);
+  text-align: center;
+  color: var(--md-sys-color-on-surface-muted);
+  font-size: var(--md-sys-typescale-body-medium-size);
+}
