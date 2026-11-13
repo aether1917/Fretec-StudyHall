@@ -4,6 +4,8 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
+. (Join-Path $PSScriptRoot 'dev-env.ps1')
+
 if (-not $env:JAVA_HOME) {
     $jdk = Get-ChildItem 'C:\Program Files\Eclipse Adoptium' -Directory -ErrorAction SilentlyContinue |
         Where-Object { $_.Name -like 'jdk-17*' } | Select-Object -First 1

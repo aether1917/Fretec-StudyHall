@@ -19,7 +19,7 @@ use super::{
 };
 
 /// 发给 discovery manager 的控制指令。
-pub(super) enum DiscoveryCommand {
+pub(crate) enum DiscoveryCommand {
     /// 开始新一轮 10 秒搜索。
     Search { generation: u64, port: u16 },
     /// 停止搜索（状态已由调用方写入，manager 只需要中断当前轮次）。
@@ -89,9 +89,9 @@ fn ensure_manager(shared: &Arc<Shared>) -> Option<mpsc::UnboundedSender<Discover
     }
 
     let shared = shared.clone();
-    let _ = tauri::async_runtime::spawn(async move {
+    drop(tauri::async_runtime::spawn(async move {
         manager(shared, receiver).await;
-    });
+    }));
     Some(sender)
 }
 

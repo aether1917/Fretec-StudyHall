@@ -212,17 +212,6 @@ pub struct TimerSnapshot {
     pub status: TimerStatus,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct TimerWire {
-    pub phase: Phase,
-    pub total_ms: u64,
-    pub started_at_ms: Option<u64>,
-    pub pause_offset_ms: u64,
-    pub paused_at_ms: Option<u64>,
-    pub status: TimerStatus,
-}
-
 pub const FOCUS_TOTAL_MS: u64 = 25 * 60 * 1000;
 pub const BREAK_TOTAL_MS: u64 = 5 * 60 * 1000;
 

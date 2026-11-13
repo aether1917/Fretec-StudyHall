@@ -144,6 +144,24 @@ CI（`.github/workflows/build.yml`）同时构建 Windows / Linux / Android 产�
 | NSIS 3.13 + `nsis_tauri_utils.dll` | Windows 安装包（Tauri bundler 缓存） |
 | Android SDK / NDK / JDK 17 | Android 构建 |
 
+## 构建环境说明
+
+标准环境下安装 Visual Studio Build Tools 2022 即可，无需额外配置。本仓库当前开发机在下载
+VS BuildTools 时受到 Microsoft CDN 限速/中断影响，因此改用**无需安装 Visual Studio** 的构建方式，
+仅用于保证本机可重复构建；对正常环境没有影响，可忽略：
+
+- 用 `xwin 0.10.0` 下载 MSVC CRT + Windows SDK 到 `%USERPROFILE%\.xwin`（不含编译器）；
+- 用 rustup 自带的 `rust-lld` 复制为 `lld-link.exe` 作为链接器；
+- 用 NuGet `Microsoft.Windows.SDK.BuildTools` 里的 `rc.exe` 编译 Windows 资源；
+- `src-tauri/vendor/vswhom-sys` 是纯 Rust 替代实现（原 crate 需要 C++ 编译器；`embed-resource`
+  在探测失败后会回退到 `RC` 环境变量与 `PATH` 中的 `rc.exe`）；
+- `scripts/dev-env.ps1` 负责探测并设置上述环境变量（`RC`、`CARGO_TARGET_X86_64_PC_WINDOWS_MSVC_LINKER`、
+  `RUSTFLAGS=-Lnative=...`），`package-windows.ps1` / `package-android.ps1` 会先加载它。
+
+`src-tauri/build.rs` 关闭了 tauri-build 默认清单嵌入，改为对所有链接目标（包括单元测试）
+统一嵌入 `windows-app-manifest.xml`（Common Controls v6），否则链接 tauri 的测试二进制
+会以 `STATUS_ENTRYPOINT_NOT_FOUND` 退出。
+
 ## 数据位置
 
 Windows：`%APPDATA%\com.fretec.studyhall\`，包含 `flow.json`（学习流与进度）、`device.json`（设备名）、

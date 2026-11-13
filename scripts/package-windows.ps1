@@ -4,6 +4,8 @@ $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 Set-Location $root
 
+. (Join-Path $PSScriptRoot 'dev-env.ps1')
+
 & (Join-Path $PSScriptRoot 'seed-nsis.ps1')
 
 Write-Host '== build frontend + Tauri NSIS installer =='

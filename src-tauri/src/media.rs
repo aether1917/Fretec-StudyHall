@@ -6,7 +6,7 @@ use crate::state::AppState;
 use crate::types::{MediaPayload, QualityInfo, Source};
 
 const BILI_REFERER: &str = "https://www.bilibili.com";
-const NETease_REFERER: &str = "https://music.163.com";
+const NETEASE_REFERER: &str = "https://music.163.com";
 const DESKTOP_UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
 pub struct MediaService {
@@ -144,7 +144,7 @@ impl MediaService {
                 let single_url = proxy
                     .register(ProxyTarget {
                         url,
-                        referer: Some(NETease_REFERER.to_string()),
+                        referer: Some(NETEASE_REFERER.to_string()),
                         user_agent: Some(DESKTOP_UA.to_string()),
                     })
                     .await;

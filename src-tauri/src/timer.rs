@@ -4,7 +4,7 @@ use crate::types::{
     now_ms, remaining_ms, Phase, TimerSnapshot, TimerStatus, BREAK_TOTAL_MS, FOCUS_TOTAL_MS,
 };
 
-#[derive(Default)]
+#[derive(Debug)]
 pub struct TimerEngine {
     inner: Mutex<TimerSnapshot>,
 }

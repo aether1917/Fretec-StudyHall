@@ -64,7 +64,7 @@ pub fn flow_reorder(state: State<'_, AppState>, ids: Vec<String>) -> CmdResult<V
             ordered.push(flow.items.remove(position));
         }
     }
-    ordered.extend(flow.items.drain(..));
+    ordered.append(&mut flow.items);
     flow.items = ordered;
     let snapshot = flow.items.clone();
     drop(flow);

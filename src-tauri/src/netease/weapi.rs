@@ -84,7 +84,7 @@ fn random_key2() -> [u8; 16] {
 
 /// AES-128-CBC + PKCS7，返回 base64 字符串。
 fn aes_encrypt_base64(data: &[u8], key: &[u8; 16]) -> CmdResult<String> {
-    let mut encryptor = cbc::Encryptor::<aes::Aes128>::new_from_slices(key, AES_IV)
+    let encryptor = cbc::Encryptor::<aes::Aes128>::new_from_slices(key, AES_IV)
         .map_err(|_| AppError::msg("网易云请求加密失败"))?;
     // PKCS7 至少填充 1 字节，最多 16 字节，预留一个完整块即可。
     let mut buffer = vec![0u8; data.len() + 16];
@@ -101,7 +101,7 @@ fn aes_decrypt_base64(encoded: &str, key: &[u8; 16]) -> CmdResult<String> {
     let mut buffer = STANDARD
         .decode(encoded)
         .map_err(|_| AppError::msg("网易云测试数据解码失败"))?;
-    let mut decryptor = cbc::Decryptor::<aes::Aes128>::new_from_slices(key, AES_IV)
+    let decryptor = cbc::Decryptor::<aes::Aes128>::new_from_slices(key, AES_IV)
         .map_err(|_| AppError::msg("网易云测试解密初始化失败"))?;
     let plain = decryptor
         .decrypt_padded_mut::<Pkcs7>(&mut buffer)

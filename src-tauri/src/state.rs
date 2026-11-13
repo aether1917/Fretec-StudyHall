@@ -3,12 +3,11 @@ use std::sync::{Arc, Mutex, OnceLock};
 use tauri::{AppHandle, Wry};
 
 use crate::bili::BiliRuntime;
-use crate::error::CmdResult;
 use crate::lan::LanService;
 use crate::media::MediaService;
 use crate::netease::NeteaseRuntime;
-use crate::storage::{AppPaths, AuthStore, DeviceInfo, FlowStore, SettingsStore};
-use crate::types::{now_ms, CaptchaAnswer, Source, TimerSnapshot};
+use crate::storage::{AppPaths, AuthStore, DeviceInfo, FlowStore};
+use crate::types::{CaptchaAnswer, Source, TimerSnapshot};
 use crate::timer::TimerEngine;
 
 pub struct AppState {
@@ -17,7 +16,6 @@ pub struct AppState {
     pub flow: Mutex<FlowStore>,
     pub auth: Mutex<AuthStore>,
     pub device: Mutex<DeviceInfo>,
-    pub settings: Mutex<SettingsStore>,
     pub http: reqwest::Client,
     pub timer: Arc<TimerEngine>,
     pub media: MediaService,
@@ -36,7 +34,6 @@ impl AppState {
         let flow = paths.load_flow();
         let auth = paths.load_auth();
         let device = paths.load_device();
-        let settings = paths.load_settings();
         let timer = Arc::new(TimerEngine::new());
         Self {
             app: OnceLock::new(),
@@ -44,7 +41,6 @@ impl AppState {
             flow: Mutex::new(flow),
             auth: Mutex::new(auth),
             device: Mutex::new(device),
-            settings: Mutex::new(settings),
             http,
             timer: timer.clone(),
             media: MediaService::new(),
@@ -148,12 +144,4 @@ impl AppState {
             crate::events::emit_lan(app, &self.lan.status());
         }
     }
-}
-
-pub fn now_stamp() -> u64 {
-    now_ms()
-}
-
-pub fn require<T>(value: Option<T>, message: &str) -> CmdResult<T> {
-    value.ok_or_else(|| crate::error::AppError::msg(message))
 }

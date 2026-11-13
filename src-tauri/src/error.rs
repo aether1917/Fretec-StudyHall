@@ -10,8 +10,6 @@ pub enum AppError {
     Io(#[from] std::io::Error),
     #[error("数据解析失败：{0}")]
     Json(#[from] serde_json::Error),
-    #[error("内部错误：{0}")]
-    Internal(String),
 }
 
 impl AppError {

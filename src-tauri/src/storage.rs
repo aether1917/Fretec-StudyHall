@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
-use crate::types::{AccountProfile, FlowItem, Progress};
+use crate::types::{AccountProfile, FlowItem};
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -107,10 +107,6 @@ pub struct NeteaseCookies {
 }
 
 impl NeteaseCookies {
-    pub fn is_logged_in(&self) -> bool {
-        !self.music_u.is_empty()
-    }
-
     pub fn header(&self) -> String {
         let mut parts: Vec<String> = Vec::new();
         if !self.music_u.is_empty() {
@@ -144,13 +140,6 @@ pub struct AuthStore {
     pub bili: Option<BiliAuth>,
     #[serde(default)]
     pub netease: Option<NeteaseAuth>,
-}
-
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct SettingsStore {
-    #[serde(default)]
-    pub notification_asked: bool,
 }
 
 #[derive(Clone)]
@@ -191,14 +180,6 @@ impl AppPaths {
     pub fn save_auth(&self, store: &AuthStore) -> std::io::Result<()> {
         write_json(self.path("auth.json"), store)
     }
-
-    pub fn load_settings(&self) -> SettingsStore {
-        read_json(self.path("settings.json"))
-    }
-
-    pub fn save_settings(&self, settings: &SettingsStore) -> std::io::Result<()> {
-        write_json(self.path("settings.json"), settings)
-    }
 }
 
 fn read_json<T: DeserializeOwned + Default>(path: PathBuf) -> T {
@@ -220,19 +201,4 @@ fn write_json<T: Serialize>(path: PathBuf, value: &T) -> std::io::Result<()> {
         fs::remove_file(&path)?;
     }
     fs::rename(tmp, path)
-}
-
-pub fn touch_progress(item: &mut FlowItem, position: f64, duration: f64) {
-    item.progress.position_sec = position.max(0.0);
-    if duration > 0.0 {
-        item.duration_sec = duration;
-    }
-    item.progress.updated_at = crate::types::now_ms();
-    if item.progress.position_sec > item.duration_sec {
-        item.progress.position_sec = item.duration_sec;
-    }
-}
-
-pub fn empty_progress() -> Progress {
-    Progress::default()
 }

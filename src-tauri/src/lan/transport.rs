@@ -61,9 +61,9 @@ pub(super) fn ensure_listener(shared: &Arc<Shared>) -> Result<(), String> {
     }
 
     let shared = shared.clone();
-    let _ = tauri::async_runtime::spawn(async move {
+    drop(tauri::async_runtime::spawn(async move {
         accept_loop(shared, std_listener, port, cancel_rx).await;
-    });
+    }));
     Ok(())
 }
 
@@ -99,15 +99,15 @@ async fn accept_loop(
             accepted = listener.accept() => match accepted {
                 Ok((stream, address)) => match rejection_reason(&shared) {
                     Some(message) => {
-                        let _ = tokio::spawn(async move {
+                        drop(tokio::spawn(async move {
                             reject_inbound(stream, message).await;
-                        });
+                        }));
                     }
                     None => {
                         let shared = shared.clone();
-                        let _ = tokio::spawn(async move {
+                        drop(tokio::spawn(async move {
                             serve_inbound(shared, stream, address).await;
-                        });
+                        }));
                     }
                 },
                 Err(error) => {
@@ -152,9 +152,9 @@ async fn reject_inbound(mut stream: TcpStream, message: &'static str) {
 
 /// 对已发现的地址发起 TCP 连接（自动发现与手动重连共用）。
 pub(super) fn spawn_dial(shared: Arc<Shared>, expected_id: String, address: SocketAddr) {
-    let _ = tauri::async_runtime::spawn(async move {
+    drop(tauri::async_runtime::spawn(async move {
         dial(shared, expected_id, address).await;
-    });
+    }));
 }
 
 async fn dial(shared: Arc<Shared>, expected_id: String, address: SocketAddr) {
@@ -228,9 +228,9 @@ async fn run_connection(
     let (cancel, cancel_rx) = watch::channel(false);
     let cleanup = cancel.clone();
     let writer_cancel = cancel_rx.clone();
-    let _ = tokio::spawn(async move {
+    drop(tokio::spawn(async move {
         writer_loop(write_half, frames_rx, writer_cancel).await;
-    });
+    }));
 
     reader_loop(
         shared,
