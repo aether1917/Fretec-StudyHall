@@ -395,6 +395,7 @@ async fn reader_loop(
                 let applied = shared.timer.apply_remote(snapshot);
                 if let Some(app) = shared.app() {
                     crate::events::emit_timer(app, &applied);
+                    #[cfg(desktop)]
                     crate::tray::update_tooltip(app, &applied);
                 }
                 // 本地计时被远端同步后 can_connect 会变化；仅刷新状态，不回广播。

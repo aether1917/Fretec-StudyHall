@@ -394,6 +394,7 @@ function buildOverlay(): void {
         class: "player__cover",
         src: current.payload.cover,
         alt: "",
+        referrerpolicy: "no-referrer",
       }),
       h("div", { class: "player__audio-title" }, current.payload.title),
       h("div", { class: "player__audio-author" }, current.payload.author),

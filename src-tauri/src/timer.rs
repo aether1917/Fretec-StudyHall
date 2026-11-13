@@ -160,3 +160,78 @@ pub fn tray_tooltip(snapshot: &TimerSnapshot) -> String {
         ),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn elapsed_snapshot(engine: &TimerEngine) {
+        let mut guard = engine.inner.lock().expect("timer lock");
+        guard.started_at_ms = Some(now_ms().saturating_sub(guard.total_ms + 1_000));
+        guard.paused_at_ms = None;
+    }
+
+    #[test]
+    fn start_pause_resume_keeps_position() {
+        let engine = TimerEngine::new();
+        let running = engine.start();
+        assert_eq!(running.status, TimerStatus::Running);
+        let paused = engine.pause();
+        assert_eq!(paused.status, TimerStatus::Paused);
+        assert!(paused.paused_at_ms.is_some());
+        let resumed = engine.resume();
+        assert_eq!(resumed.status, TimerStatus::Running);
+        assert!(resumed.paused_at_ms.is_none());
+    }
+
+    #[test]
+    fn stop_resets_to_focus_idle() {
+        let engine = TimerEngine::new();
+        engine.start();
+        let stopped = engine.stop();
+        assert_eq!(stopped.status, TimerStatus::Idle);
+        assert_eq!(stopped.phase, Phase::Focus);
+        assert_eq!(stopped.total_ms, FOCUS_TOTAL_MS);
+        assert_eq!(stopped.started_at_ms, None);
+    }
+
+    #[test]
+    fn tick_advances_focus_to_break_without_waiting_for_user() {
+        let engine = TimerEngine::new();
+        engine.start();
+        elapsed_snapshot(&engine);
+        let next = engine.tick().expect("phase should advance");
+        assert_eq!(next.phase, Phase::Break);
+        assert_eq!(next.total_ms, BREAK_TOTAL_MS);
+        assert_eq!(next.status, TimerStatus::Running);
+    }
+
+    #[test]
+    fn tick_advances_break_to_focus() {
+        let engine = TimerEngine::new();
+        {
+            let mut guard = engine.inner.lock().expect("timer lock");
+            *guard = TimerSnapshot {
+                phase: Phase::Break,
+                total_ms: BREAK_TOTAL_MS,
+                started_at_ms: Some(now_ms()),
+                pause_offset_ms: 0,
+                paused_at_ms: None,
+                status: TimerStatus::Running,
+            };
+        }
+        elapsed_snapshot(&engine);
+        let next = engine.tick().expect("phase should advance");
+        assert_eq!(next.phase, Phase::Focus);
+        assert_eq!(next.total_ms, FOCUS_TOTAL_MS);
+    }
+
+    #[test]
+    fn paused_timer_does_not_advance() {
+        let engine = TimerEngine::new();
+        engine.start();
+        engine.pause();
+        elapsed_snapshot(&engine);
+        assert!(engine.tick().is_none());
+    }
+}

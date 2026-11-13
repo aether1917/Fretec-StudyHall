@@ -103,6 +103,7 @@ export function buildShell(): ShellRefs {
     class: "mini-player__cover",
     alt: "",
     src: "",
+    referrerpolicy: "no-referrer",
   }) as HTMLImageElement;
   const miniTitle = h("span", { class: "mini-player__title" });
   const miniPlay = h(

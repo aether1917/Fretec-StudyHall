@@ -7,9 +7,9 @@ fn main() {
     );
     tauri_build::try_build(attributes).expect("failed to run tauri-build");
 
-    // 为所有链接目标（含单元测试）嵌入 Common Controls v6 清单。
-    #[cfg(windows)]
-    {
+    // 仅 Windows 目标需要清单；Android/Linux 的链接器不认识 MSVC 参数。
+    let target_os = std::env::var("CARGO_CFG_TARGET_OS").unwrap_or_default();
+    if target_os == "windows" {
         let manifest = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("windows-app-manifest.xml");
         println!("cargo:rerun-if-changed={}", manifest.display());

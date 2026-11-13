@@ -74,6 +74,13 @@ function wireShell(): void {
   store.subscribe((state) => {
     updateNav(state.page);
   });
+
+  let lastFlow = store.get().flow;
+  store.subscribe((state) => {
+    if (state.flow === lastFlow) return;
+    lastFlow = state.flow;
+    if (state.page === "flow") renderFlowPage(refs.content);
+  });
 }
 
 function setPage(page: "flow" | "settings"): void {

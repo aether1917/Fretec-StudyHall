@@ -94,6 +94,20 @@ powershell -ExecutionPolicy Bypass -File scripts/package-android.ps1
 pnpm tauri android init
 ```
 
+> **Windows 未开启开发者模式时**：Tauri CLI 会用符号链接把 `.so` 放进 `jniLibs`，没有
+> `SeCreateSymbolicLinkPrivilege` 会失败。本机采用等价流程（无需管理员权限）：
+>
+> 1. `cargo build --manifest-path src-tauri/Cargo.toml --target aarch64-linux-android --release --lib --features tauri/custom-protocol`
+> 2. 复制 `src-tauri/target/aarch64-linux-android/release/libfretec_studyhall_lib.so` 到
+>    `src-tauri/gen/android/app/src/main/jniLibs/arm64-v8a/`
+> 3. 在 `src-tauri/gen/android/app/build.gradle.kts` 中把 `compileSdk` 设为 36、加上
+>    `keystore.properties` 签名配置；把 `buildSrc` 里的 `BuildTask.kt` 改为空实现，
+>    然后运行 `gradle assembleArm64Release`（`gen/` 为生成目录，不提交 git）。
+>
+> 本机通过该流程产出 `out/Fretec-StudyHall-0.1.0-arm64.apk`（自签 keystore 位于
+> `%USERPROFILE%\.tools\fretec-studyhall.keystore`，不写入仓库）。正常开启开发者模式
+> 的机器可直接使用 `pnpm tauri android build --apk`。
+
 ### Linux
 
 ```bash
@@ -161,6 +175,40 @@ VS BuildTools 时受到 Microsoft CDN 限速/中断影响，因此改用**无需
 `src-tauri/build.rs` 关闭了 tauri-build 默认清单嵌入，改为对所有链接目标（包括单元测试）
 统一嵌入 `windows-app-manifest.xml`（Common Controls v6），否则链接 tauri 的测试二进制
 会以 `STATUS_ENTRYPOINT_NOT_FOUND` 退出。
+
+## 界面截图（本机实际运行）
+
+| 学习流空态 | 翻页钟（纯黑扩散展开） | 计时中 |
+| --- | --- | --- |
+| ![](docs/screenshots/01-study-flow-empty.png) | ![](docs/screenshots/02-flip-clock.png) | ![](docs/screenshots/03-timer-running.png) |
+
+| 设置页 | 搜索真实结果 | 播放器 |
+| --- | --- | --- |
+| ![](docs/screenshots/04-settings.png) | ![](docs/screenshots/05-search-results.png) | ![](docs/screenshots/06-player.png) |
+
+| 迷你播放条 |
+| --- |
+| ![](docs/screenshots/07-mini-player.png) |
+
+## 本机验证记录（Windows 10 x64）
+
+已验证：
+
+- `cargo test`：45+ 单元测试通过（WBI 签名向量、weapi 加解密、Rust/网易云错误码、局域网帧、计时状态机、搜索解析等）。
+- `cargo clippy --all-targets -- -D warnings` 通过；`pnpm typecheck` / `pnpm build` 通过；颜色令牌检查通过。
+- `scripts/package-windows.ps1` 产出 `out/Fretec StudyHall_0.1.0_x64-setup.exe`，体积约 3.3 MB。
+- 启动应用、顶栏/底栏布局、学习流空态、设置页、计时胶囊纯黑扩散展开翻页钟、点击开始 / 暂停 / 继续、缩小回胶囊读数一致。
+- 哔哩哔哩真实搜索（WBI 签名）返回列表，封面加载正常，添加条目后学习流出现卡片。
+- 卡片打开全屏播放器，B 站 DASH 视频经本地代理播放，进度条 / 时间 / 720P / 倍速控件正常；返回后迷你播放条出现，`flow.json` 记录进度（本机实测 position ≈ 36s）。
+- Android：`AndroidManifest` 合并、Kotlin 前台服务插件编译、Rust `aarch64-linux-android` 交叉编译、Rustls TLS；产出 `out/Fretec-StudyHall-0.1.0-arm64.apk` 并用自签 keystore 签名（`apksigner verify` 通过）。
+
+未在本机验证（需真实账号 / 第二台设备 / Android 真机 / Linux 主机）：
+
+- 扫码登录、短信验证码登录、密码登录、极验人机验证的真实账号流程。
+- 局域网双设备发现与倒计时同步（本机仅有代码与单元测试）。
+- Android 常驻通知、通知按钮与权限弹窗的真机行为。
+- 系统托盘悬停提示、托盘单击显隐的真机交互（托盘创建由代码保证，无法用截图验证）。
+- Linux `.deb` / AppImage 构建（由 CI 工作流覆盖）。
 
 ## 数据位置
 

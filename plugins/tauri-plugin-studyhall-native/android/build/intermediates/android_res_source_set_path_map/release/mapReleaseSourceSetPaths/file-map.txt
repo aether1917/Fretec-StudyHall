@@ -1,0 +1,9 @@
+com.fretec.studyhall.nativeplugin.tauri-plugin-studyhall-native-pngs-0 C:\Users\Aether\Desktop\Work\Code\Fretec\Fretec StudyHall\plugins\tauri-plugin-studyhall-native\android\build\generated\res\pngs\release
+com.fretec.studyhall.nativeplugin.tauri-plugin-studyhall-native-updated_navigation_xml-1 C:\Users\Aether\Desktop\Work\Code\Fretec\Fretec StudyHall\plugins\tauri-plugin-studyhall-native\android\build\generated\updated_navigation_xml\release
+com.fretec.studyhall.nativeplugin.tauri-plugin-studyhall-native-mergeReleaseResources-2 C:\Users\Aether\Desktop\Work\Code\Fretec\Fretec StudyHall\plugins\tauri-plugin-studyhall-native\android\build\intermediates\incremental\release\mergeReleaseResources\merged.dir
+com.fretec.studyhall.nativeplugin.tauri-plugin-studyhall-native-mergeReleaseResources-3 C:\Users\Aether\Desktop\Work\Code\Fretec\Fretec StudyHall\plugins\tauri-plugin-studyhall-native\android\build\intermediates\incremental\release\mergeReleaseResources\stripped.dir
+com.fretec.studyhall.nativeplugin.tauri-plugin-studyhall-native-release-4 C:\Users\Aether\Desktop\Work\Code\Fretec\Fretec StudyHall\plugins\tauri-plugin-studyhall-native\android\build\intermediates\merged_res\release\mergeReleaseResources
+com.fretec.studyhall.nativeplugin.tauri-plugin-studyhall-native-release-5 C:\Users\Aether\Desktop\Work\Code\Fretec\Fretec StudyHall\plugins\tauri-plugin-studyhall-native\android\build\intermediates\packaged_res\release\packageReleaseResources
+com.fretec.studyhall.nativeplugin.tauri-plugin-studyhall-native-main-6 C:\Users\Aether\Desktop\Work\Code\Fretec\Fretec StudyHall\plugins\tauri-plugin-studyhall-native\android\src\main\res
+com.fretec.studyhall.nativeplugin.tauri-plugin-studyhall-native-release-7 C:\Users\Aether\Desktop\Work\Code\Fretec\Fretec StudyHall\plugins\tauri-plugin-studyhall-native\android\src\release\res
+gradleHome-0 C:\Users\Aether\.gradle

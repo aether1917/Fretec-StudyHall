@@ -113,6 +113,10 @@ pub fn run() {
                 api.prevent_close();
                 let _ = window.hide();
             }
+            #[cfg(not(desktop))]
+            {
+                let _ = (window, event);
+            }
         })
         .run(tauri::generate_context!())
         .expect("error while running Fretec StudyHall");
