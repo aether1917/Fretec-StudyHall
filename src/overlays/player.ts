@@ -157,6 +157,7 @@ function createMedia(payload: MediaPayload): {
 
   if (payload.videoUrl && payload.audioUrl) {
     const video = document.createElement("video");
+    video.className = "player__video";
     video.preload = "auto";
     video.muted = true;
     video.src = payload.videoUrl;
@@ -168,6 +169,7 @@ function createMedia(payload: MediaPayload): {
   }
 
   const video = document.createElement("video");
+  video.className = "player__video";
   video.preload = "auto";
   video.src = payload.singleUrl ?? payload.videoUrl ?? "";
   mediaHost().append(video);
