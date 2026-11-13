@@ -1,4 +1,4 @@
-# 将本地仓库绑定到 Gitee（可选：创建仓库并推送）
+# Create / bind the Gitee repository and optionally push.
 param(
     [string]$Owner = $env:GITEE_OWNER,
     [string]$Repo = 'Fretec-StudyHall',
@@ -10,17 +10,17 @@ param(
 $ErrorActionPreference = 'Stop'
 $api = 'https://gitee.com/api/v5'
 
-if (-not $Token) { throw '缺少 Gitee 访问令牌：请设置环境变量 GITEE_TOKEN 或传 -Token' }
+if (-not $Token) { throw 'missing token: set GITEE_TOKEN or pass -Token' }
 if (-not $Owner) {
     $user = Invoke-RestMethod -Method Get -Uri "$api/user?access_token=$Token"
     $Owner = $user.login
 }
-if (-not $Owner) { throw '无法解析 Gitee 用户名' }
+if (-not $Owner) { throw 'cannot resolve Gitee owner' }
 
 $encodedRepo = [uri]::EscapeDataString($Repo)
 $exists = $false
 try {
-    Invoke-RestMethod -Method Get -Uri "$api/repos/$Owner/$encodedRepo?access_token=$Token" | Out-Null
+    Invoke-RestMethod -Method Get -Uri "$api/repos/$Owner/$encodedRepo`?access_token=$Token" | Out-Null
     $exists = $true
 } catch {
     $exists = $false
@@ -35,14 +35,14 @@ if (-not $exists) {
         has_issues   = $true
     }
     Invoke-RestMethod -Method Post -Uri "$api/user/repos" -Body $body | Out-Null
-    Write-Host "已在 Gitee 创建仓库：$Owner/$Repo"
+    Write-Host "created Gitee repo: $Owner/$Repo"
 } else {
-    Write-Host "Gitee 仓库已存在：$Owner/$Repo"
+    Write-Host "Gitee repo exists: $Owner/$Repo"
 }
 
 $remoteUrl = "https://gitee.com/$Owner/$Repo.git"
-$existingRemote = git remote get-url gitee 2>$null
-if ($LASTEXITCODE -eq 0) {
+$remotes = @(git remote)
+if ($remotes -contains 'gitee') {
     git remote set-url gitee $remoteUrl
 } else {
     git remote add gitee $remoteUrl
@@ -52,6 +52,6 @@ Write-Host "remote gitee => $remoteUrl"
 if ($Push) {
     $authed = "https://${Owner}:${Token}@gitee.com/$Owner/$Repo.git"
     git -c credential.helper= push $authed HEAD:refs/heads/main
-    if ($LASTEXITCODE -ne 0) { throw '推送失败' }
-    Write-Host '已推送到 Gitee'
+    if ($LASTEXITCODE -ne 0) { throw 'push failed' }
+    Write-Host 'pushed to Gitee'
 }

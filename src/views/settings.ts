@@ -369,10 +369,10 @@ function openQrDialog(source: Source): void {
 }
 
 function cssColor(variable: string): string {
-  const value = getComputedStyle(document.documentElement)
-    .getPropertyValue(variable)
-    .trim();
-  return value || "#000000";
+  const root = getComputedStyle(document.documentElement);
+  const value = root.getPropertyValue(variable).trim();
+  if (value) return value;
+  return root.getPropertyValue("--md-sys-color-on-surface").trim();
 }
 
 /* ---------------- 手机号登录弹层 ---------------- */

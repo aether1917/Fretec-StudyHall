@@ -2,7 +2,7 @@ import { buildShell, type ShellRefs } from "./ui/shell";
 import { store } from "./store";
 import { showToast } from "./ui/toast";
 import { formatMMSS, remainingMs } from "./util/time";
-import { initClock, isClockOpen, openClock, updateClock } from "./overlays/clock";
+import { initClock, isClockOpen, closeClock, openClock, updateClock } from "./overlays/clock";
 import { closeOverlay } from "./overlays/manager";
 import { renderFlowPage } from "./views/flow";
 import { renderSettingsPage } from "./views/settings";
@@ -65,7 +65,7 @@ function wireShell(): void {
   window.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
     if (isClockOpen()) {
-      import("./overlays/clock").then((module) => module.closeClock());
+      closeClock();
       return;
     }
     if (store.get().overlay !== null) closeOverlay();

@@ -4,6 +4,7 @@ import { store } from "../store";
 import type { FlowItem } from "../types";
 import { showToast } from "../ui/toast";
 import { icon } from "../ui/icons";
+import { openPlayer } from "../overlays/player";
 
 const SWIPE_LIMIT_RATIO = 0.3;
 
@@ -399,6 +400,5 @@ async function persistOrder(ids: string[]): Promise<void> {
 }
 
 async function openItem(itemId: string): Promise<void> {
-  const { openPlayer } = await import("../overlays/player");
   await openPlayer(itemId);
 }
