@@ -1,1 +1,0 @@
-com.fretec.studyhall.nativeplugin
