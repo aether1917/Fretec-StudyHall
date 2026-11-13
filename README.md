@@ -13,7 +13,7 @@
 - 局域网：UDP 广播发现，TCP 长连接，只同步倒计时状态，最多 4 台。计时进行中不允许新建连接，学习流和播放进度不同步。
 - 托盘和通知：Windows/Linux 关窗口后留在托盘，单击显示或隐藏；Android 用前台服务维护常驻通知，通知标题显示专注或休息状态和剩余时间。
 - 设置：外观（浅色 / 深色 / 跟随系统）、关闭窗口行为（桌面）、权限（Android，通知权限和专注锁定说明放在一起）、检查更新和关于。检查更新读 Gitee 的 release 接口，只做版本比对，安装包需要手动去发行页下载。
-- 图标：M3 风格，默认用深色底、米白/红/绿三条学习流横条加播放键的方案；其他候选图放在 `out/icons/`，换图标用 `scripts/gen-icons.py` 里的变体。
+- 图标：M3 风格，默认用深色底、米白/红/绿三条学习流横条加播放键的方案；Android 用自适应图标，前景内容缩在安全区里，避免被圆形遮罩裁掉。其他候选图放在 `out/icons/`，换图标用 `scripts/gen-icons.py` 里的变体。
 
 ## 界面
 
@@ -104,7 +104,7 @@ Windows 存在 `%APPDATA%\com.fretec.studyhall\`，Android 在应用私有目录
 
 ## 本机验证情况
 
-Windows 上跑过：启动、两个页面切换、胶囊展开和收回、胶囊颜色、开始/暂停/继续、B 站真实搜索结果、结果直接播放、播放列表切歌、卡片打开播放器并播放、返回后迷你条出现、`flow.json` 里进度正常写入；播放器在 436×859 和 1200×700 两种窗口下都能自适应；浅色和深色切换、检查更新、关闭窗口行为也实际点过。`cargo test` 50 个测试通过，`cargo clippy -D warnings` 通过，`pnpm typecheck` 和 `pnpm build` 通过，`node scripts/check-tokens.mjs` 通过。产物是 `out/Fretec-StudyHall-1.0.0-RC-x64-setup.exe` 和 `out/Fretec-StudyHall-1.0.0-RC-arm64.apk`。
+Windows 上跑过：启动、两个页面切换、胶囊展开和收回、胶囊颜色、开始/暂停/继续、B 站真实搜索结果、结果直接播放、播放列表切歌、卡片打开播放器并播放、返回后迷你条出现、`flow.json` 里进度正常写入；播放器在 436×859 和 1200×700 两种窗口下都能自适应；浅色和深色切换、检查更新、关闭窗口行为也实际点过。`cargo test` 50 个测试通过，`cargo clippy -D warnings` 通过，`pnpm typecheck` 和 `pnpm build` 通过，`node scripts/check-tokens.mjs` 通过。产物是 `out/Fretec-StudyHall-1.0.0-RC.1-x64-setup.exe` 和 `out/Fretec-StudyHall-1.0.0-RC.1-arm64.apk`。
 
 没条件验证的：Android 真机上的全屏锁定、屏幕固定、返回键、通知和权限弹窗；局域网两台设备之间的发现和同步（只有代码和单元测试）；托盘悬停提示的实际效果；Linux 打包。
 

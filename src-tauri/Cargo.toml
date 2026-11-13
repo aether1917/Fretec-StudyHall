@@ -1,6 +1,6 @@
 [package]
 name = "fretec-studyhall"
-version = "1.0.0-RC"
+version = "1.0.0-RC.1"
 description = "Fretec StudyHall — pomodoro + study flow"
 authors = ["Aether"]
 edition = "2021"

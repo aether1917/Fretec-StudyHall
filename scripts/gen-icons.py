@@ -245,7 +245,104 @@ def build_production(icon: Image.Image):
         tray.resize((size, size), Image.LANCZOS).save(ICONS / name)
 
 
+def content_layer(box: int) -> Image.Image:
+    """Transparent layer with only the flow bars and play glyph."""
+    s = box
+    layer = Image.new("RGBA", (s, s), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(layer)
+    left = int(s * 0.18)
+    width = int(s * 0.45)
+    bar = int(s * 0.10)
+    gap = int(s * 0.06)
+    top = int(s * 0.30)
+    for index, color in enumerate([CREAM, RED, GREEN]):
+        y = top + index * (bar + gap)
+        draw.rounded_rectangle(
+            (left, y, left + width, y + bar), radius=bar // 2, fill=color
+        )
+    triangle(draw, int(s * 0.80), int(s * 0.50), int(s * 0.10), CREAM)
+    return layer
+
+
+def fit_content(size: int, ratio: float) -> Image.Image:
+    """Content scaled to `ratio` of the canvas, centered, transparent."""
+    big = content_layer(2048)
+    bbox = big.getbbox()
+    if bbox is None:
+        return Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    content = big.crop(bbox)
+    target_w = int(size * ratio)
+    target_h = int(content.height * target_w / content.width)
+    if target_h > int(size * ratio):
+        target_h = int(size * ratio)
+        target_w = int(content.width * target_h / content.height)
+    content = content.resize((target_w, target_h), Image.LANCZOS)
+    canvas = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    canvas.alpha_composite(
+        content, ((size - target_w) // 2, (size - target_h) // 2)
+    )
+    return canvas
+
+
+def build_android():
+    res = ROOT / "src-tauri" / "gen" / "android" / "app" / "src" / "main" / "res"
+    if not res.exists():
+        return
+    densities = {
+        "mdpi": (48, 108),
+        "hdpi": (72, 162),
+        "xhdpi": (96, 216),
+        "xxhdpi": (144, 324),
+        "xxxhdpi": (192, 432),
+    }
+    for density, (legacy, fg) in densities.items():
+        folder = res / f"mipmap-{density}"
+        folder.mkdir(parents=True, exist_ok=True)
+        option_flow(legacy).resize((legacy, legacy), Image.LANCZOS).save(
+            folder / "ic_launcher.png"
+        )
+        # circular legacy icon
+        round_icon = Image.new("RGBA", (legacy, legacy), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(round_icon)
+        draw.ellipse((0, 0, legacy - 1, legacy - 1), fill=DARK)
+        round_icon.alpha_composite(fit_content(legacy, 0.58))
+        round_icon.save(folder / "ic_launcher_round.png")
+        fit_content(fg, 0.58).save(folder / "ic_launcher_foreground.png")
+
+    colors = res / "values"
+    colors.mkdir(parents=True, exist_ok=True)
+    (colors / "ic_launcher_background.xml").write_text(
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<resources>\n'
+        '  <color name="ic_launcher_background">#141414</color>\n'
+        "</resources>\n",
+        encoding="utf-8",
+    )
+
+    # preview: adaptive icon under circle / squircle / rounded-square masks
+    preview = Image.new("RGBA", (900, 360), (255, 255, 255, 255))
+    base = Image.new("RGBA", (300, 300), DARK)
+    base.alpha_composite(fit_content(300, 0.58))
+    masks = []
+    circle = Image.new("L", (300, 300), 0)
+    ImageDraw.Draw(circle).ellipse((0, 0, 299, 299), fill=255)
+    masks.append(circle)
+    squircle = Image.new("L", (300, 300), 0)
+    ImageDraw.Draw(squircle).rounded_rectangle((0, 0, 299, 299), radius=88, fill=255)
+    masks.append(squircle)
+    square = Image.new("L", (300, 300), 0)
+    ImageDraw.Draw(square).rounded_rectangle((0, 0, 299, 299), radius=42, fill=255)
+    masks.append(square)
+    for index, mask in enumerate(masks):
+        icon = Image.new("RGBA", (300, 300), (0, 0, 0, 0))
+        icon.paste(base, (0, 0), mask)
+        preview.alpha_composite(icon, (30 + index * 290, 30))
+    (OPTIONS / "android-preview.png").parent.mkdir(parents=True, exist_ok=True)
+    preview.save(OPTIONS / "android-preview.png")
+
+
 if __name__ == "__main__":
     build_options()
     build_production(option_flow(1024))
+    build_android()
     print("icons written to", OPTIONS)
