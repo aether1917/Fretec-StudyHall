@@ -298,10 +298,8 @@ pub(crate) async fn ensure_mixin_key(state: &AppState) -> CmdResult<String> {
 
     let cookies = prepare_cookies(state).await?;
     let response = execute(state, api_get(state, NAV_URL, &cookies)).await?;
-    let code = response.code();
-    if code != 0 {
-        return Err(api_error(state, code, response.message()));
-    }
+    // 未登录时 nav 返回 code=-101，但仍会带 data.wbi_img；WBI 密钥与登录态无关，
+    // 因此这里不按 code 判错，只要求 wbi_img 可解析。
     let data = response
         .data()
         .ok_or_else(|| AppError::msg("哔哩哔哩签名信息获取失败，请稍后再试"))?;

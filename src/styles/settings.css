@@ -94,13 +94,23 @@
 
 .settings-card__actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: var(--md-sys-space-2);
 }
 
 .settings-card__actions .tonal-button,
 .settings-card__actions .filled-button {
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0 var(--md-sys-space-3);
+  gap: var(--md-sys-space-1);
+  font-size: var(--md-sys-typescale-label-medium-size);
+}
+
+.settings-card__actions .tonal-button svg,
+.settings-card__actions .filled-button svg {
+  width: 18px;
+  height: 18px;
 }
 
 /* ---------- 底部弹层（手机号登录等） ---------- */
