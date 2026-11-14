@@ -174,10 +174,17 @@ async function loadInitialState(): Promise<void> {
     );
   }
   void lanStatus()
-    .then((lan) => store.set({ lan }))
+    .then((lan) => {
+      store.set({ lan });
+      updateLanDot(lan);
+    })
     .catch(() => {
       /* 局域网不可用时保持静默，互联页会提示 */
     });
+}
+
+function updateLanDot(lan: LanStatus | null | undefined): void {
+  refs.lanDot.hidden = !(lan?.peers.some((peer) => peer.online) ?? false);
 }
 
 function wireEvents(): void {
@@ -188,6 +195,7 @@ function wireEvents(): void {
 
   void onEvent<LanStatus>("lan://status", (lan) => {
     store.set({ lan });
+    updateLanDot(lan);
   });
 
   void onEvent<void>("ui://open-clock", () => {

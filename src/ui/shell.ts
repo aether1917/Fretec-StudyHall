@@ -7,6 +7,7 @@ export interface ShellRefs {
   capsule: HTMLButtonElement;
   capsuleTime: HTMLSpanElement;
   lanBtn: HTMLButtonElement;
+  lanDot: HTMLSpanElement;
   banner: HTMLDivElement;
   bannerText: HTMLSpanElement;
   bannerAction: HTMLButtonElement;
@@ -52,16 +53,21 @@ export function buildShell(): ShellRefs {
     },
     capsuleTime,
   );
+  const lanDot = h("span", {
+    class: "lan-dot",
+    hidden: "",
+  }) as HTMLSpanElement;
   const lanBtn = h(
     "button",
     {
-      class: "icon-btn",
+      class: "icon-btn lan-btn",
       id: "lan-btn",
       type: "button",
       "aria-label": "多设备互联",
       title: "多设备互联",
     },
     icon("devices"),
+    lanDot,
   );
 
   const topBar = h(
@@ -187,6 +193,7 @@ export function buildShell(): ShellRefs {
     capsule,
     capsuleTime,
     lanBtn,
+    lanDot,
     banner,
     bannerText,
     bannerAction,

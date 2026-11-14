@@ -1057,7 +1057,7 @@ dependencies = [
 
 [[package]]
 name = "fretec-studyhall"
-version = "1.0.0-RC.1"
+version = "1.0.0"
 dependencies = [
  "aes",
  "axum",

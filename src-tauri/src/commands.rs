@@ -494,6 +494,12 @@ pub fn lan_stop(state: State<'_, AppState>) {
 }
 
 #[tauri::command]
+pub fn lan_stop_search(state: State<'_, AppState>) {
+    state.lan.stop_search();
+    state.publish_lan_status();
+}
+
+#[tauri::command]
 pub fn lan_connect(state: State<'_, AppState>, peer_id: String) -> CmdResult<()> {
     state.lan.connect(&peer_id);
     Ok(())

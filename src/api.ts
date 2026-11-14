@@ -175,6 +175,7 @@ export const nativeFocusMode = (active: boolean) =>
 export const lanStatus = () => call<LanStatus>("lan_status");
 export const lanStart = () => call<LanStatus>("lan_start");
 export const lanStop = () => call<void>("lan_stop");
+export const lanStopSearch = () => call<void>("lan_stop_search");
 export const lanConnect = (peerId: string) =>
   call<void>("lan_connect", { peerId });
 export const lanDisconnect = (peerId: string) =>

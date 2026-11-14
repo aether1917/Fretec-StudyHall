@@ -36,7 +36,7 @@ export function renderFlowPage(container: HTMLElement): void {
         h(
           "div",
           { class: "flow-empty__text" },
-          "点击左上角搜索图标，把哔哩哔哩视频或网易云音乐加入这里。",
+          "点击左上角搜索图标，把哔哩哔哩视频加入这里。",
         ),
       ),
     );
@@ -104,7 +104,7 @@ function buildRow(
     h(
       "span",
       { class: "flow-card__source" },
-      item.source === "bili" ? "B站" : "网易云",
+      item.source === "bili" ? "B站" : "已移除",
     ),
     " ",
     item.author || "未知作者",

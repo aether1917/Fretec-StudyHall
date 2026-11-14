@@ -195,6 +195,19 @@ impl LanService {
         emit_status(&shared);
     }
 
+    /// 停止发现搜索，但保留已建立的连接和监听端口。
+    pub fn stop_search(&self) {
+        {
+            let _lifecycle = self.lifecycle.lock().expect("lan lifecycle");
+            let mut inner = self.shared.inner.lock().expect("lan lock");
+            inner.generation = inner.generation.wrapping_add(1);
+            inner.searching = false;
+            inner.message = "已停止搜索".to_string();
+        }
+        discovery::stop(&self.shared);
+        emit_status(&self.shared);
+    }
+
     /// 停止搜索与所有连接；保留可用性与已发现设备记录（便于重新搜索后手动重连）。
     pub fn stop(&self) {
         {

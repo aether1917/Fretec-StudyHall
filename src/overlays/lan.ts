@@ -1,4 +1,4 @@
-import { lanDisconnect, lanStart } from "../api";
+import { lanDisconnect, lanStart, lanStopSearch } from "../api";
 import { h } from "../dom";
 import { store } from "../store";
 import type { LanPeer, LanStatus } from "../types";
@@ -28,6 +28,7 @@ export function openLanOverlay(): void {
   const root = h("div", { class: "overlay-layer lan" }, header, bodyEl);
 
   const opened = showOverlay("lan", root, () => {
+    void lanStopSearch().catch(() => undefined);
     unsubscribe?.();
     unsubscribe = null;
     bodyEl = null;

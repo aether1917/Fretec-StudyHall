@@ -47,7 +47,6 @@ pub fn run() {
                     let guard = loop_handle.state::<state::AppState>();
                     (guard.timer.clone(), guard.lan.clone())
                 };
-                lan.start_search();
                 let mut last_slow_update = std::time::Instant::now();
                 loop {
                     tokio::time::sleep(Duration::from_millis(250)).await;
@@ -113,6 +112,7 @@ pub fn run() {
             commands::lan_status,
             commands::lan_start,
             commands::lan_stop,
+            commands::lan_stop_search,
             commands::lan_connect,
             commands::lan_disconnect,
         ])

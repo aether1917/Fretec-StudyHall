@@ -151,6 +151,26 @@ img {
   display: block;
 }
 
+.lan-btn {
+  position: relative;
+}
+
+.lan-dot {
+  position: absolute;
+  left: 11px;
+  bottom: 11px;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--md-sys-shape-corner-full);
+  background: var(--md-sys-color-break);
+  border: 2px solid var(--md-sys-color-background);
+  pointer-events: none;
+}
+
+.lan-dot[hidden] {
+  display: none;
+}
+
 /* ---------- Timer capsule ---------- */
 .capsule {
   flex: 0 0 auto;

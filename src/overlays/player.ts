@@ -484,7 +484,7 @@ function renderPlaylist(panel: HTMLElement): void {
         h(
           "div",
           { class: "player__playlist-meta" },
-          `${entry.source === "bili" ? "B站" : "网易云"} · ${entry.author}`,
+          `${entry.source === "bili" ? "B站" : "已移除"} · ${entry.author}`,
         ),
       ),
     ) as HTMLButtonElement;
